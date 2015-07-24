@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation>
+	<!-- frames declaration -->
+	<frames>	
+		<frame name="Ship1" file="../SpaceGame/resources/Spaceship with motor new/1.png" />
+	</frames>		
+	<!-- sequences declaration -->
+	<sequences>
+		<sequence name="Ship_advance">
+			<frame name="Ship1" time="150" />
+		</sequence>				
+	</sequences>
+</animation>

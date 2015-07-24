@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation>
+	<!-- frames declaration -->
+	<frames>
+		<frame name="Ship1" file="../SpaceGame/resources/Spaceship explode/without motor/1.png" />
+		<frame name="Ship2" file="../SpaceGame/resources/Spaceship explode/without motor/2.png" />
+		<frame name="Ship3" file="../SpaceGame/resources/Spaceship explode/without motor/3.png" />
+		<frame name="Ship4" file="../SpaceGame/resources/Spaceship explode/without motor/4.png" />
+		<frame name="Ship5" file="../SpaceGame/resources/Spaceship explode/without motor/5.png" />
+		<frame name="Ship6" file="../SpaceGame/resources/Spaceship explode/without motor/6.png" />
+		<frame name="Ship7" file="../SpaceGame/resources/Spaceship explode/without motor/7.png" />
+		<frame name="Ship8" file="../SpaceGame/resources/Spaceship explode/without motor/8.png" />
+		<frame name="Ship9" file="../SpaceGame/resources/Spaceship explode/without motor/9.png" />
+		<frame name="Ship10" file="../SpaceGame/resources/Spaceship explode/without motor/10.png" />
+		<frame name="Ship11" file="../SpaceGame/resources/Spaceship explode/without motor/11.png" />
+		<frame name="Ship12" file="../SpaceGame/resources/Spaceship explode/without motor/12.png" />
+		<frame name="Ship13" file="../SpaceGame/resources/Spaceship explode/without motor/13.png" />
+		<frame name="Ship14" file="../SpaceGame/resources/Spaceship explode/without motor/14.png" />
+	</frames>
+	<!-- sequences declaration -->
+	<sequences>
+		<sequence name="Explode_without_motor">
+			<frame name="Ship1" time="150" />
+			<frame name="Ship2" time="150" />
+			<frame name="Ship3" time="150" />
+			<frame name="Ship4" time="150" />
+			<frame name="Ship5" time="150" />
+			<frame name="Ship6" time="150" />
+			<frame name="Ship7" time="150" />
+			<frame name="Ship8" time="150" />
+			<frame name="Ship9" time="150" />
+			<frame name="Ship10" time="150" />
+			<frame name="Ship11" time="150" />
+			<frame name="Ship12" time="150" />
+			<frame name="Ship13" time="150" />
+			<frame name="Ship14" time="150" />
+		</sequence>
+	</sequences>
+</animation>

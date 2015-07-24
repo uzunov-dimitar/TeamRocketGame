@@ -1,0 +1,5 @@
+[advance]:w
+[rotateLeft]:a
+[rotateRight]:d
+[quickSave]:1
+[quickLoad]:2

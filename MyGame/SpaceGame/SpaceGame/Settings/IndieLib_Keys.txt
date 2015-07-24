@@ -1,0 +1,264 @@
+	//! a
+	IND_A,
+	//! b
+	IND_B,
+	//! c
+	IND_C,
+	//! d
+	IND_D,
+	//! e
+	IND_E,
+	//! f
+	IND_F,
+	//! g
+	IND_G,
+	//! h
+	IND_H,
+	//! i
+	IND_I,
+	//! j
+	IND_J,
+	//! k
+	IND_K,
+	//! l
+	IND_L,
+	//! m
+	IND_M,
+	//! n
+	IND_N,
+	//! o
+	IND_O,
+	//! p
+	IND_P,
+	//! q
+	IND_Q,
+	//! r
+	IND_R,
+	//! s
+	IND_S,
+	//! t
+	IND_T,
+	//! u
+	IND_U,
+	//! v
+	IND_V,
+	//! w
+	IND_W,
+	//! x
+	IND_X,
+	//! y
+	IND_Y,
+	//! z
+	IND_Z,
+	//! 0
+	IND_0,
+	//! 1
+	IND_1,
+	//! 2
+	IND_2,
+	//! 3
+	IND_3,
+	//! 4
+	IND_4,
+	//! 5
+	IND_5,
+	//! 6
+	IND_6,
+	//! 7
+	IND_7,
+	//! 8
+	IND_8,
+	//! 9
+	IND_9,
+	//! backspace key
+	IND_BACKSPACE,
+	//! Tab
+	IND_TAB,
+	//! Clear
+	IND_CLEAR,
+	//! Return
+	IND_RETURN,
+	//! Pause
+	IND_PAUSE,
+	//! Escape
+	IND_ESCAPE,
+	//! Space
+	IND_SPACE,
+	//! Exclaim
+	IND_EXCLAIM,
+	//! Quotedbl
+	IND_QUOTEDBL,
+	//! hash
+	IND_HASH,
+	//! percent
+	IND_PERCENT,
+	//! Dollar
+	IND_DOLLAR,
+	//! ampersand
+	IND_AMPERSAND,
+	//! quote
+	IND_QUOTE,
+	//! left parenthesis
+	IND_LEFTPAREN,
+	//! right parenthesis
+	IND_RIGHTPAREN,
+	//! Asterisk
+	IND_ASTERISK,
+	//! plus
+	IND_PLUS,
+	//! Comma
+	IND_COMMA,
+	//! Minus
+	IND_MINUS,
+	//! Period
+	IND_PERIOD,
+	//! slash
+	IND_SLASH,
+	//! colon
+	IND_COLON,
+	//! semicolon
+	IND_SEMICOLON,
+	//! less than
+	IND_LESS,
+	//! equals
+	IND_EQUALS,
+	//! greater than
+	IND_GREATER,
+	//! question
+	IND_QUESTION,
+	//! at
+	IND_AT,
+	//! left bracket
+	IND_LEFTBRACKET,
+	//! Back slash
+	IND_BACKSLASH,
+	//! right bracket
+	IND_RIGHTBRACKET,
+	//! caret
+	IND_CARET,
+	//! underscore
+	IND_UNDERSCORE,
+	//! back quote
+	IND_BACKQUOTE,
+	//! Delete
+	IND_DELETE,
+	//! 0 (numeric keyboard area)
+	IND_K0,
+	//! 1 (numeric keyboard area)
+	IND_K1,
+	//! 2 (numeric keyboard area)
+	IND_K2,
+	//! 3 (numeric keyboard area)
+	IND_K3,
+	//! 4 (numeric keyboard area)
+	IND_K4,
+	//! 5 (numeric keyboard area)
+	IND_K5,
+	//! 6 (numeric keyboard area)
+	IND_K6,
+	//! 7 (numeric keyboard area)
+	IND_K7,
+	//! 8 (numeric keyboard area)
+	IND_K8,
+	//! 9 (numeric keyboard area)
+	IND_K9,
+	//! Period (numeric keyboard area)
+	IND_KPERIOD,
+	//! Divide (numeric keyboard area)
+	IND_KDIVIDE,
+	//! Multiply (numeric keyboard area)
+	IND_KMULTIPLY,
+	//! Minus (numeric keyboard area)
+	IND_KMINUS,
+	//! Plus (numeric keyboard area)
+	IND_KPLUS,
+	//! Enter (numeric keyboard area)
+	IND_KENTER,
+	//! Equals (numeric keyboard area)
+	IND_KEQUALS,
+	//! Key up
+	IND_KEYUP,
+	//! Key down
+	IND_KEYDOWN,
+	//! Key right
+	IND_KEYRIGHT,
+	//! Key left
+	IND_KEYLEFT,
+	//! Insert
+	IND_INSERT,
+	//! Home
+	IND_HOME,
+	//! End
+	IND_END,
+	//! Page up
+	IND_PAGEUP,
+	//! Page down
+	IND_PAGEDOWN,
+	//! F1
+	IND_F1,
+	//! F2
+	IND_F2,
+	//! F3
+	IND_F3,
+	//! F4
+	IND_F4,
+	//! F5
+	IND_F5,
+	//! F6
+	IND_F6,
+	//! F7
+	IND_F7,
+	//! F8
+	IND_F8,
+	//! F9
+	IND_F9,
+	//! F10
+	IND_F10,
+	//! F11
+	IND_F11,
+	//! F12
+	IND_F12,
+	//! F13
+	IND_F13,
+	//! F14
+	IND_F14,
+	//! F15
+	IND_F15,
+	//! Numlock
+	IND_NUMLOCK,
+	//! Capslock
+	IND_CAPSLOCK,
+	//! Scrollock
+	IND_SCROLLOCK,
+	//! Right shift
+	IND_RSHIFT,
+	//! Left shift
+	IND_LSHIFT,
+	//! Right control
+	IND_RCTRL,
+	//! Left control
+	IND_LCTRL,
+	//! Right Alt
+	IND_RALT,
+	//! Left Alt
+	IND_LALT,
+	//! Right Meta
+	IND_RMETA,
+	//! Left Meta
+	IND_LMETA,
+	//! Mode shift
+	IND_MODE,
+	//! Help
+	IND_HELP,
+	//! Print
+	IND_PRINT,
+	//! Sysreq
+	IND_SYSREQ,
+	//! Break
+	IND_BREAK,
+	//! Menu
+	IND_MENU,
+	//! Power
+	IND_POWER,
+	//! Currency unit in keyboard
+	IND_CURRENCYUNIT

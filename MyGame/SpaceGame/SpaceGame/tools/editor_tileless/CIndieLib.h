@@ -1,6 +1,6 @@
 /*****************************************************************************************
- * Desc: IndieLib singleton initialization class
- *****************************************************************************************/
+* Desc: IndieLib singleton initialization class
+*****************************************************************************************/
 
 #ifndef _CINDIELIB_
 #define _CINDIELIB_
@@ -32,7 +32,7 @@ public:
 
 protected:
 
-	CIndieLib()  {}
+	CIndieLib() {}
 	CIndieLib(const CIndieLib &);
 	CIndieLib &operator = (const CIndieLib &);
 
