@@ -85,6 +85,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Controls.cpp" />
+    <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Planet.cpp" />
@@ -94,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controls.h" />
+    <ClInclude Include="ErrorHandler.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Save.h" />

@@ -5,8 +5,9 @@
 #include <map>
 #include <string>
 #include "CIndieLib.h"
+#include "ErrorHandler.h"
 
-class Controls {
+class Controls : public ErrorHandler {
 private:
 	map<string, IND_Key> keyMap;
 public:
@@ -15,6 +16,7 @@ public:
 	IND_Key getRotateRight();
 	IND_Key getQuickSave();
 	IND_Key getQuickLoad();
+
 	void loadSettings();
 };
 #endif

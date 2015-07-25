@@ -5,8 +5,9 @@
 #include <string.h>
 #include <map>
 #include <iostream>
+#include "ErrorHandler.h"
 
-class Save {
+class Save : public ErrorHandler {
 private:
 public:
 	void loadSettings();

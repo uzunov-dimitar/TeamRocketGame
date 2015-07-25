@@ -36,6 +36,9 @@
     <ClCompile Include="Ship.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ErrorHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\editor_tileless\CIndieLib.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Ship.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
