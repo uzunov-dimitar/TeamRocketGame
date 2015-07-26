@@ -1,7 +1,17 @@
 #include "ErrorHandler.h"
 
-ErrorHandler::ErrorHandler() : mFont(IND_Font::newFont()), mText2d(IND_Entity2d::newEntity2d())
+ErrorHandler::ErrorHandler() : initialized (false), mFont(IND_Font::newFont()), mText2d(IND_Entity2d::newEntity2d())
 {
+}
+
+bool ErrorHandler::isInitialized() const
+{
+	return initialized;
+}
+
+void ErrorHandler::setInitialized(bool initialized)
+{
+	this->initialized = initialized;
 }
 
 IND_Font * ErrorHandler::getFont() const
@@ -26,16 +36,22 @@ void ErrorHandler::setText2d(IND_Entity2d * mText2d)
 
 void ErrorHandler::initialize(CIndieLib * mI)
 {
-	mI->_fontManager->add(getFont(), "resources/font_small.png", "resources/font_small.xml", IND_ALPHA, IND_32);
+	// prevent unintentional double initialization
+	if (!isInitialized())
+	{
+		mI->_fontManager->add(getFont(), "resources/font_small.png", "resources/font_small.xml", IND_ALPHA, IND_32);
 
-	mI->_entity2dManager->add(getText2d());
+		mI->_entity2dManager->add(getText2d());
 
-	getText2d()->setFont(getFont());
+		getText2d()->setFont(getFont());
+
+		setInitialized(true);
+	}
 }
 
 void ErrorHandler::writeError(float posX, float posY,string label, string value)
 {
-	getText2d()->setPosition(posX, posX, 0);
+	getText2d()->setPosition(posX, posY, 1);
 	getText2d()->setText((label+":" + value).c_str());
 }
 

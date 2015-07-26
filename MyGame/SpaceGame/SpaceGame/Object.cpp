@@ -1,6 +1,6 @@
 #include "Object.h"
 
-Object::Object() : mSurface(IND_Surface::newSurface()), mEntity2d(IND_Entity2d::newEntity2d()), posX(0.0f), posY(0.0f), scaleX(0.0f), scaleY(0.0f), angleZ(0.0f)
+Object::Object() : posX(0.0f), posY(0.0f), scaleX(0.0f), scaleY(0.0f), angleZ(0.0f), pathSurface(new char[100]), mSurface(IND_Surface::newSurface()), mEntity2d(IND_Entity2d::newEntity2d())
 {
 }
 
@@ -26,6 +26,12 @@ void Object::setPosY(float posY)
 	getEntity2d()->setPosition(getEntity2d()->getPosX(), posY, 0);
 }
 
+void Object::setPosition(float posX, float posY)
+{
+	setPosX(posX);
+	setPosY(posY);
+}
+
 float Object::getScaleX() const
 {
 	return scaleX;
@@ -48,6 +54,22 @@ void Object::setScaleY(float scaleY)
 	getEntity2d()->setScale(getEntity2d()->getScaleX(), scaleY);
 }
 
+void Object::setScale(float scaleX, float scaleY)
+{
+	setScaleX(scaleX);
+	setScaleY(scaleY);
+}
+
+float Object::getWidth() const
+{
+	return getSurface()->getWidth()*getScaleX();
+}
+
+float Object::getHeight() const
+{
+	return getSurface()->getHeight()*getScaleY();
+}
+
 float Object::getAngleZ() const
 {
 	return angleZ;
@@ -57,6 +79,26 @@ void Object::setAngleZ(float angleZ)
 {
 	this->angleZ = angleZ;
 	getEntity2d()->setAngleXYZ(0, 0, angleZ);
+}
+
+float Object::getAngleZRadian() const
+{
+	// indielib interprets moving clockwise in a positive degree and anticlockwise as a negative degree 
+	// in math (including the implementation of sin and cos in c++) it is the opposite
+	// that's why take the opposite of the degree 
+	// and then add 90 degrees to it since the rocket faces +90 degrees by default
+	// then convert to radians
+	return (-getAngleZ() + 90) / 180.0f * M_PI;
+}
+
+char * Object::getPathSurface() const
+{
+	return pathSurface;
+}
+
+void Object::setPathSurface(const char * pathSurface)
+{
+	strncpy(this->pathSurface, pathSurface, 99);
 }
 
 CIndieLib * Object::getMI() const
@@ -93,26 +135,26 @@ void Object::checkCoords()
 {
 	// Check for negative coordinates
 
-	if (getEntity2d()->getPosX() < 0)
+	if (getPosX() < 0)
 	{
-		getEntity2d()->setPosition(0, getEntity2d()->getPosY(), 0);
+		setPosition(0, getPosY());
 	}
 
-	if (getEntity2d()->getPosY() < 0)
+	if (getPosY() < 0)
 	{
-		getEntity2d()->setPosition(getEntity2d()->getPosX(), 0, 0);
+		setPosition(getPosX(), 0);
 	}
 
 	// Check for too big coordinates
 
-	if (getEntity2d()->getPosX() > getMI()->_window->getWidth())
+	if (getPosX() > getMI()->_window->getWidth())
 	{
-		getEntity2d()->setPosition(getMI()->_window->getWidth(), getEntity2d()->getPosY(), 0);
+		setPosition(getMI()->_window->getWidth(), getPosY());
 	}
 
-	if (getEntity2d()->getPosY() > getMI()->_window->getHeight())
+	if (getPosY() > getMI()->_window->getHeight())
 	{
-		getEntity2d()->setPosition(getEntity2d()->getPosX(), getMI()->_window->getHeight(), 0);
+		setPosition(getPosX(), getMI()->_window->getHeight());
 	}
 }
 
@@ -120,4 +162,5 @@ Object::~Object()
 {
 	getSurface()->destroy();
 	getEntity2d()->destroy();
+	delete[] pathSurface;
 }

@@ -1,13 +1,13 @@
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <ctime>
+#include <vector>
 #include "CIndieLib.h"
 #include "IND_Surface.h"
-#include "IND_Entity2d.h"
 #include "IND_Animation.h"
 #include "IND_Font.h"
+#include "IND_Entity2d.h"
 #include "Controls.h"
 #include "Planet.h"
+#include "Save.h"
 #include "Ship.h"
 
 /*
@@ -27,39 +27,60 @@ int IndieLib()
 	int winWidth = mI->_window->getWidth();
 	int winHeight = mI->_window->getHeight();
 
+	srand(static_cast<unsigned int>(time(0)));
+
 	// ----- Surface loading -----
 
 	IND_Surface *mSurfaceBack = IND_Surface::newSurface();
 	if (!mI->_surfaceManager->add(mSurfaceBack, "resources/Backgrounds/18.jpg", IND_OPAQUE, IND_32)) return 0;
-
-	IND_Font* mFont = IND_Font::newFont();
-	if (!mI->_fontManager->add(mFont, "resources/font_small.png", "resources/font_small.xml", IND_ALPHA, IND_32)) return 0;
-
-	// Loding 2D Entities
+	
+	// Loading 2D Entities
 
 	IND_Entity2d* mBack = IND_Entity2d::newEntity2d();
 	mI->_entity2dManager->add(mBack);
 	mBack->setSurface(mSurfaceBack);
 	mBack->setScale((float)winWidth / mSurfaceBack->getWidth(), (float)winHeight / mSurfaceBack->getHeight());
 
-	IND_Entity2d* mText = IND_Entity2d::newEntity2d();
-	mI->_entity2dManager->add(mText);
-	mText->setFont(mFont);
-	mText->setPosition(1300, 200, 0);
-	//mText->setText("");
-
 	Controls* controls = new Controls();
 	controls->loadSettings();
 
-	Planet* mPlanet = new Planet();
-	mPlanet->createPlanet(mI, "resources/planets/1.png", 100, 100, 0.5f, 0.5f);
+	ErrorHandler* error = new ErrorHandler();
+	error->initialize(mI);
 
-	Ship* mShip = new Ship();
-	mShip->createShip(mI, "resources/Spaceship with motor new/Ship_advance.xml", winWidth/2, winHeight/2);
+	vector<Planet*> mPlanets;
+	for (int i = 0; i < 8; i++)
+	{
+		mPlanets.push_back(new Planet());
+
+		float randPercent = (0.15f - (rand()%10+1)/100.0f);
+		float randDegree = (i*M_PI / 4.0f) + (rand() % 60 + 1) / 100.0f;
+
+		float radius = (1 - randPercent)*winHeight/2.0f;
+		float posX = winWidth / 2.0 + radius*cos(randDegree);
+		float posY = winHeight / 2.0 + radius*sin(randDegree);
+
+		mPlanets.back()->createPlanet(mI, ("resources/Planets/" + to_string(i + 1) + ".png").c_str(), posX, posY, randPercent);
+		mPlanets.back()->setAngleZ(-randDegree / M_PI * 180);
+	}
+
+	Ship* mShip = new Ship(100, winWidth/7.0f, winWidth/3.0f);
+	mShip->createShip(mI, "resources/Spaceship with motor new/1.png", winWidth/2, winHeight/2);
+
+	Save* quickSave = new Save();
 
 	while (!mI->_input->onKeyPress(IND_ESCAPE) && !mI->_input->quit())
 	{
+		if (mI->_input->onKeyPress(controls->getQuickSave()))
+		{
+			quickSave->makeSave(mI, mShip, mPlanets);
+		}
 		mShip->moveShip(controls);
+		int i = 1;
+		for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
+		{
+			(*it)->movePlanet();
+			i++;
+		}
 		//mI->_render->showFpsInWindowTitle();
 		mI->_input->update();
 		mI->_render->beginScene();

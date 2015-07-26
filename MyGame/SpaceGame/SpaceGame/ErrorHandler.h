@@ -7,11 +7,14 @@
 
 class ErrorHandler {
 private:
+	bool initialized;
 	IND_Font* mFont;
 	IND_Entity2d* mText2d;
 public:
 	ErrorHandler();
 
+	bool isInitialized()const;
+	void setInitialized(bool);
 	IND_Font* getFont() const;
 	void setFont(IND_Font*);
 	IND_Entity2d* getText2d() const;

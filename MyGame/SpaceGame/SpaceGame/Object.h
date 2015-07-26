@@ -1,6 +1,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include "CINDielib.h"
 #include "IND_Surface.h"
 #include "IND_Entity2d.h"
@@ -11,6 +13,7 @@ private:
 	float posX, posY;
 	float scaleX, scaleY;
 	float angleZ;
+	char* pathSurface;
 	CIndieLib* mI;
 	IND_Surface* mSurface;
 	IND_Entity2d* mEntity2d;
@@ -21,12 +24,23 @@ public:
 	void setPosX(float);
 	float getPosY() const;
 	void setPosY(float);
+	void setPosition(float, float);
+
 	float getScaleX() const;
 	void setScaleX(float);
 	float getScaleY() const;
 	void setScaleY(float);
+	void setScale(float, float);
+
+	float getWidth() const;
+	float getHeight() const;
+
 	float getAngleZ() const;
 	void setAngleZ(float);
+	float getAngleZRadian() const;
+
+	char* getPathSurface() const;
+	void setPathSurface(const char*);
 
 	CIndieLib* getMI() const;
 	void setMI(CIndieLib*);

@@ -1,6 +1,6 @@
 #include "Ship.h"
 
-Ship::Ship(float acceleration, float maxSpeed) : health(100), speed(0.0f), acceleration(acceleration), maxSpeed(maxSpeed), mAnimationShip(IND_Animation::newAnimation()), mAnimationStill(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d())
+Ship::Ship(int health, float acceleration, float maxSpeed) : health(health), speed(0.0f), acceleration(acceleration), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d())
 {
 }
 
@@ -34,16 +34,6 @@ float Ship::getMaxSpeed() const
 	return maxSpeed;
 }
 
-IND_Animation * Ship::getAnimationShip() const
-{
-	return mAnimationShip;
-}
-
-void Ship::setAnimationShip(IND_Animation * mAnimationShip)
-{
-	this->mAnimationShip = mAnimationShip;
-}
-
 IND_Animation * Ship::getAnimationStill() const
 {
 	return mAnimationStill;
@@ -52,6 +42,16 @@ IND_Animation * Ship::getAnimationStill() const
 void Ship::setAnimationStill(IND_Animation * mAnimationStill)
 {
 	this->mAnimationStill = mAnimationStill;
+}
+
+IND_Animation * Ship::getAnimationShip() const
+{
+	return mAnimationShip;
+}
+
+void Ship::setAnimationShip(IND_Animation * mAnimationShip)
+{
+	this->mAnimationShip = mAnimationShip;
 }
 
 IND_Animation * Ship::getAnimationLeft() const
@@ -84,7 +84,7 @@ void Ship::setAnim2dShip(IND_Entity2d * mAnim2dShip)
 	this->mAnim2dShip = mAnim2dShip;
 }
 
-void Ship::loadProperties()
+void Ship::loadPropsAnim2d()
 {
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
 	getAnim2dShip()->setPosition(getPosX(), getPosY(), 0);
@@ -92,24 +92,16 @@ void Ship::loadProperties()
 	getAnim2dShip()->setAngleXYZ(0, 0, getAngleZ());
 }
 
-void Ship::saveProperties()
-{
-	setPosX(getEntity2d()->getPosX());
-	setPosY(getEntity2d()->getPosY());
-	setScaleX(getEntity2d()->getScaleX());
-	setScaleY(getEntity2d()->getScaleY());
-	setAngleZ(getEntity2d()->getAngleZ());
-}
-
-void Ship::createShip(CIndieLib * const mI, const char * path, const float posX, const float posY)
+void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, const float posY)
 {
 	setMI(mI);
 	initialize(mI);
 
-	// Load Animations
-	getMI()->_surfaceManager->add(getSurface(), "resources/Spaceship with motor new/1.png", IND_ALPHA, IND_32);
+	// Load Surface + Animations
+	setPathSurface(path);
+	getMI()->_surfaceManager->add(getSurface(), path, IND_ALPHA, IND_32);
 
-	getMI()->_animationManager->addToSurface(getAnimationShip(), path, IND_ALPHA, IND_32);
+	getMI()->_animationManager->addToSurface(getAnimationShip(), "resources/Spaceship with motor new/Ship_advance.xml", IND_ALPHA, IND_32);
 
 	getMI()->_animationManager->addToSurface(getAnimationStill(), "resources/Spaceship with motor new/Ship_still.xml", IND_ALPHA, IND_32);
 
@@ -117,63 +109,73 @@ void Ship::createShip(CIndieLib * const mI, const char * path, const float posX,
 
 	getMI()->_animationManager->addToSurface(getAnimationRight(), "resources/Spaceship rotation smoke/RIGHT/Rotate_right.xml", IND_ALPHA, IND_32);
 
-	// Manage 2D entity
+	// Manage the 2D entities - both entity2d and mAnim2dShip
 
 	getMI()->_entity2dManager->add(getEntity2d());
 	getMI()->_entity2dManager->add(getAnim2dShip());
 
 	getEntity2d()->setSurface(getSurface());
-	getEntity2d()->setHotSpot(0.5f, 0.5f);
-	getEntity2d()->setPosition(posX, posY, 0);
+	getEntity2d()->setHotSpot(0.5f, 0.5f); // comment out to see both entity2d and mAnim2dShip
+	setPosition(posX, posY);
 
 	getAnim2dShip()->setAnimation(getAnimationStill());
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
 	getAnim2dShip()->setPosition(posX, posY, 0);
 
+	// the scale is set so that the ship takes at maximum 5% of the width of the screen and 15% of the height
+	// if taking 5% of the width requires taking more than 15% of the height,
+	// the ship would take less than 5% of the width and exactly 15% of the height and vice versa
+
 	int winWidth = getMI()->_window->getWidth();
 	int winHeight = getMI()->_window->getHeight();
-	float entWidth = getAnimationStill()->getHighWidth(0);
-	float entHeight = getAnimationStill()->getHighHeight(0);
-	float scale = ((0.05*(winWidth/entWidth)) < (0.15*(winHeight/entHeight)) ? (0.05*(winWidth / entWidth)) : (0.15*(winHeight / entHeight)));
+	float entWidth = getSurface()->getWidth();
+	float entHeight = getSurface()->getHeight();
+	float scale = ((0.05*(winWidth / entWidth)) < (0.15*(winHeight / entHeight)) ? (0.05*(winWidth / entWidth)) : (0.15*(winHeight / entHeight)));
 
-	getEntity2d()->setScale(scale, scale);
+	// scaleX and scaleY are always equal
+	setScale(scale, scale);
 	getAnim2dShip()->setScale(scale, scale);
 
-	this->saveProperties();
 }
 
 void Ship::moveShip(Controls* controls)
 {
+	// get delta time
 	float mDelta = getMI()->_render->getFrameTime() / 1000.0f;
 
 	// Set Rotated Animation and Restart the Sequence
-	// IMPORTANT: everytime the animation is reset, the properties of the 2d entity are reset
-	// Solution: load them from the Object class
-	if (getMI()->_input->onKeyPress(controls->getRotateLeft()) || getMI()->_input->onKeyPress(controls->getRotateRight()))
-	{
-		getAnim2dShip()->setAnimation(getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? getAnimationLeft() : getAnimationRight());
-		getAnim2dShip()->setSequence(0); // Otherwise will continue from where it stopped
-	}
+	// IMPORTANT: everytime the animation is reset, the properties of the mAnim2dShip are reset
+	// Use loadPropsAnim2d() at the end of the function
 
-	// Move or slow down
+	// Move or Deaccelerate
 
 	if (getMI()->_input->isKeyPressed(controls->getAdvance()))
 	{
 		getAnim2dShip()->setAnimation(getAnimationShip());
 
-		getEntity2d()->setPosition(getEntity2d()->getPosX() + getSpeed() * cos((-getEntity2d()->getAngleZ() + 90) / 180 * M_PI) * mDelta, getEntity2d()->getPosY() - getSpeed() * sin((-getEntity2d()->getAngleZ() + 90) / 180 * M_PI) * mDelta, 0);
+		// restart the animation on key press
+		if (getMI()->_input->onKeyPress(controls->getAdvance()))
+		{
+			getAnim2dShip()->setSequence(0);
+		}
+
+		setPosX(getPosX() + getSpeed() * cos(getAngleZRadian()) * mDelta);
+		setPosY(getPosY() - getSpeed() * sin(getAngleZRadian()) * mDelta);
 		this->checkCoords();
 
-		setSpeed(getSpeed() + ((getSpeed() + getAcceleration()*mDelta) < getMaxSpeed() ? getAcceleration()*mDelta : 0));
-
+		setSpeed(getSpeed() + ((getSpeed() + getAcceleration()*mDelta) < getMaxSpeed() ?
+																						getAcceleration()*mDelta :
+																						0));
 	}
 	else
 	{
 		getAnim2dShip()->setAnimation(getAnimationStill());
 
-		// Slow Down
+		// Deaccelerate
 
-		setSpeed(getSpeed() - ((getSpeed() - getAcceleration()*mDelta) > 0 ? getAcceleration()*mDelta : 0));
+		setSpeed(getSpeed() - ((getSpeed() - getAcceleration()*mDelta) > 0 ?
+																			getAcceleration()*mDelta :
+																			0));
 	}
 
 	// In case Both the Up and either Left or Right keys are pressed, the later should overwrite the standard animation
@@ -183,21 +185,23 @@ void Ship::moveShip(Controls* controls)
 	{
 		// Set Animation
 
-		getAnim2dShip()->setAnimation(getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? getAnimationLeft() : getAnimationRight());
+		getAnim2dShip()->setAnimation(getMI()->_input->isKeyPressed(controls->getRotateLeft()) ?
+																								getAnimationLeft() : 
+																								getAnimationRight());
 
-		// Rotate
+		// restart the animation on key press
+		if (getMI()->_input->onKeyPress(controls->getRotateLeft()) || getMI()->_input->onKeyPress(controls->getRotateRight()))
+		{
+			getAnim2dShip()->setSequence(0);
+		}
 
-		getEntity2d()->setAngleXYZ(0, 0, getEntity2d()->getAngleZ() + (getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? -1 : 1) * 180 * mDelta);
+		// Rotate with 180 degrees per second
+
+		setAngleZ(getAngleZ() + (getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? -1 : 1) * 180 * mDelta);
 	}
-	// Change to standard animation on the release of the Left/Right keys
 
-	if (getMI()->_input->onKeyRelease(controls->getRotateLeft()) || getMI()->_input->onKeyRelease(controls->getRotateRight()))
-	{
-		getAnim2dShip()->setAnimation(getAnimationShip());
-	}
-
-	this->saveProperties();
-	this->loadProperties();
+	// load back the properties into mAnim2dShip
+	this->loadPropsAnim2d();
 }
 
 Ship::~Ship()
