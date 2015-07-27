@@ -39,6 +39,8 @@ void ErrorHandler::initialize(CIndieLib * mI)
 	// prevent unintentional double initialization
 	if (!isInitialized())
 	{
+		mi = mI;
+
 		mI->_fontManager->add(getFont(), "resources/font_small.png", "resources/font_small.xml", IND_ALPHA, IND_32);
 
 		mI->_entity2dManager->add(getText2d());
@@ -65,6 +67,9 @@ void ErrorHandler::writeError(float posX, float posY, string label, float value)
 
 ErrorHandler::~ErrorHandler()
 {
-	getFont()->destroy();
-	getText2d()->destroy();
+	if (mi)
+	{
+		mi->_fontManager->remove(getFont());
+		mi->_entity2dManager->remove(getText2d());
+	}
 }

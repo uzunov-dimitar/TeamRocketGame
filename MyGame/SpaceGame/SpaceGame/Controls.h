@@ -18,6 +18,8 @@ public:
 	IND_Key getQuickLoad();
 
 	void loadSettings();
+
+	~Controls();
 };
 #endif
 

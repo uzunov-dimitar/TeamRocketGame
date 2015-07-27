@@ -43,7 +43,6 @@ void Controls::loadSettings()
 		{
 			if (line[0] != '#')
 			{
-				// 
 				char* action = new char[40];
 				strncpy(action, line.substr(line.find_first_of("[") + 1, line.find_first_of("]") - line.find_first_of("[") - 1).c_str(), 29);
 				keyMap[action] = IND_0;
@@ -80,4 +79,8 @@ void Controls::loadSettings()
 	}
 	indKeys.close();
 	customKeys.close();
+}
+
+Controls::~Controls()
+{
 }

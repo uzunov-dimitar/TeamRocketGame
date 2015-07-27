@@ -29,9 +29,19 @@ float Ship::getAcceleration() const
 	return acceleration;
 }
 
+void Ship::setAcceleration(float acceleration)
+{
+	this->acceleration = acceleration;
+}
+
 float Ship::getMaxSpeed() const
 {
 	return maxSpeed;
+}
+
+void Ship::setMaxSpeed(float maxSpeed)
+{
+	this->maxSpeed = maxSpeed;
 }
 
 IND_Animation * Ship::getAnimationStill() const
@@ -177,7 +187,7 @@ void Ship::moveShip(Controls* controls)
 																			getAcceleration()*mDelta :
 																			0));
 	}
-
+	
 	// In case Both the Up and either Left or Right keys are pressed, the later should overwrite the standard animation
 	// Also perform the actual rotation on the ship
 
@@ -206,9 +216,14 @@ void Ship::moveShip(Controls* controls)
 
 Ship::~Ship()
 {
-	getAnimationShip()->destroy();
+	getMI()->_animationManager->remove(getAnimationStill());
+	getMI()->_animationManager->remove(getAnimationShip());
+	getMI()->_animationManager->remove(getAnimationLeft());
+	getMI()->_animationManager->remove(getAnimationRight());
+	getMI()->_entity2dManager->remove(getAnim2dShip());
+	/*getAnimationShip()->destroy();
 	getAnimationStill()->destroy();
 	getAnimationLeft()->destroy();
 	getAnimationRight()->destroy();
-	getAnim2dShip()->destroy();
+	getAnim2dShip()->destroy();*/
 }

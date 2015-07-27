@@ -8,6 +8,7 @@
 class ErrorHandler {
 private:
 	bool initialized;
+	CIndieLib* mi;
 	IND_Font* mFont;
 	IND_Entity2d* mText2d;
 public:

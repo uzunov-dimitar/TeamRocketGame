@@ -9,8 +9,8 @@ class Ship : public Object {
 private:
 	int health;
 	float speed;
-	const float acceleration;
-	const float maxSpeed;
+	float acceleration;
+	float maxSpeed;
 	IND_Animation* mAnimationStill;
 	IND_Animation* mAnimationShip;
 	IND_Animation* mAnimationLeft;
@@ -24,7 +24,9 @@ public:
 	float getSpeed() const;
 	void setSpeed(float);
 	float getAcceleration() const;
+	void setAcceleration(float);
 	float getMaxSpeed() const;
+	void setMaxSpeed(float);
 
 	IND_Animation* getAnimationStill() const;
 	void setAnimationStill(IND_Animation*);

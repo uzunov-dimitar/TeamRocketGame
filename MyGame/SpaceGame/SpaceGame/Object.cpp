@@ -109,6 +109,8 @@ CIndieLib * Object::getMI() const
 void Object::setMI(CIndieLib * mI)
 {
 	this->mI = mI;
+	// for the Errorhandler;
+	initialize(mI);
 }
 
 IND_Surface * Object::getSurface() const
@@ -160,7 +162,7 @@ void Object::checkCoords()
 
 Object::~Object()
 {
-	getSurface()->destroy();
-	getEntity2d()->destroy();
+	getMI()->_surfaceManager->remove(getSurface());
+	getMI()->_entity2dManager->remove(getEntity2d());
 	delete[] pathSurface;
 }

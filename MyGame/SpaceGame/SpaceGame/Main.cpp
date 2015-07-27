@@ -36,6 +36,10 @@ int IndieLib()
 	
 	// Loading 2D Entities
 
+	IND_Surface *mSurface1 = IND_Surface::newSurface();
+	if (!mI->_surfaceManager->add(mSurface1, "resources/Backgrounds/18.jpg", IND_OPAQUE, IND_32)) return 0;
+	mI->_surfaceManager->remove(mSurface1);
+
 	IND_Entity2d* mBack = IND_Entity2d::newEntity2d();
 	mI->_entity2dManager->add(mBack);
 	mBack->setSurface(mSurfaceBack);
@@ -59,7 +63,7 @@ int IndieLib()
 		float posX = winWidth / 2.0 + radius*cos(randDegree);
 		float posY = winHeight / 2.0 + radius*sin(randDegree);
 
-		mPlanets.back()->createPlanet(mI, ("resources/Planets/" + to_string(i + 1) + ".png").c_str(), posX, posY, randPercent);
+		mPlanets.back()->createPlanet(mI, ("resources/Planets/" + to_string(i+1) + ".png").c_str(), posX, posY, randPercent);
 		mPlanets.back()->setAngleZ(-randDegree / M_PI * 180);
 	}
 
@@ -74,12 +78,14 @@ int IndieLib()
 		{
 			quickSave->makeSave(mI, mShip, mPlanets);
 		}
+		if (mI->_input->onKeyPress(controls->getQuickLoad()))
+		{
+			quickSave->loadSave(mI, mShip, mPlanets);
+		}
 		mShip->moveShip(controls);
-		int i = 1;
 		for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
 		{
 			(*it)->movePlanet();
-			i++;
 		}
 		//mI->_render->showFpsInWindowTitle();
 		mI->_input->update();
@@ -89,8 +95,14 @@ int IndieLib()
 	}
 
 	// ----- Free -----
-
+	delete controls;
+	delete error;
+	delete quickSave;
+	delete mShip;
+	for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
+	{
+		delete (*it);
+	}
 	mI->end();
-
 	return 0;
 }
