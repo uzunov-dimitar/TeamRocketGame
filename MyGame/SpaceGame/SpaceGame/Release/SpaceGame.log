@@ -1,15 +1,7 @@
-﻿Build started 26.7.2015 г. 22:42:49 ч..
+﻿Build started 28.7.2015 г. 17:26:55 ч..
      1>Project "D:\Works\GameDev\GameDev\MyGame\SpaceGame\SpaceGame\SpaceGame.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         D:\Programs\VisualStudio\VC\bin\CL.exe /c /ID:\Works\GameDev\GameDev\MyGame\SpaceGame\SpaceGame\common\include /ID:\Works\GameDev\GameDev\MyGame\SpaceGame\SpaceGame\tools\editor_tileless /I..\..\..\..\common\include /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
-         Main.cpp
-     1>Main.cpp(56): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>Main.cpp(59): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>Main.cpp(60): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>Main.cpp(63): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>Main.cpp(67): warning C4244: 'argument' : conversion from 'int' to 'const float', possible loss of data
-       Link:
-         D:\Programs\VisualStudio\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\Release\SpaceGame.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:D:\Works\GameDev\GameDev\MyGame\SpaceGame\SpaceGame\bin\win /LIBPATH:../../../../bin/win IndieLib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\Release\SpaceGame.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\Release\SpaceGame.lib" /MACHINE:X86 /SAFESEH Release\Controls.obj
+     1>Link:
+         D:\Programs\VisualStudio\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\Release\SpaceGame.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:D:\Works\GameDev\GameDev\MyGame\SpaceGame\SpaceGame\bin\win /LIBPATH:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\SpaceGame\irrKlang\lib\Win32-visualStudio" /LIBPATH:../../../../bin/win IndieLib.lib irrKlang.lib IndieLib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\Release\SpaceGame.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Works\GameDev\GameDev\MyGame\SpaceGame\Release\SpaceGame.lib" /MACHINE:X86 /SAFESEH Release\Controls.obj
          Release\ErrorHandler.obj
          Release\Main.obj
          Release\Object.obj
@@ -24,4 +16,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.17
+Time Elapsed 00:00:02.54

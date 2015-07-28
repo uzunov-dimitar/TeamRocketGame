@@ -24,6 +24,7 @@ public:
 	void initialize(CIndieLib*);
 	void writeError(float, float, string, string);
 	void writeError(float, float, string, float);
+	void clear();
 
 	virtual ~ErrorHandler();
 };

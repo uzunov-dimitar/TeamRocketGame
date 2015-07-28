@@ -47,6 +47,7 @@ void ErrorHandler::initialize(CIndieLib * mI)
 
 		getText2d()->setFont(getFont());
 
+		getText2d()->setAlign(IND_CENTER);
 		setInitialized(true);
 	}
 }
@@ -63,6 +64,11 @@ void ErrorHandler::writeError(float posX, float posY, string label, float value)
 	sprintf(text, "%f", value);
 	writeError(posX, posY, label, text);
 	delete[] text;
+}
+
+void ErrorHandler::clear()
+{
+	getText2d()->setText("");
 }
 
 ErrorHandler::~ErrorHandler()

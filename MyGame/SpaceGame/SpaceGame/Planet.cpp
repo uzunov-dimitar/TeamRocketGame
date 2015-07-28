@@ -13,7 +13,6 @@ void Planet::createPlanet(CIndieLib * const mI, const char * path, const float p
 {
 	// Initialize the master instance + error handler
 	setMI(mI);
-	initialize(mI);
 
 	// Manage the surface
 	setPathSurface(path);
@@ -37,16 +36,18 @@ void Planet::createPlanet(CIndieLib * const mI, const char * path, const float p
 	setScale(scale, scale);
 }
 
-void Planet::movePlanet()
+void Planet::movePlanet(float mDelta)
 {
-	// get delta time
-	float mDelta = getMI()->_render->getFrameTime() / 1000.0f;
-
 	// move at 45 degrees per second
 	setAngleZ(getAngleZ() + (45 * mDelta));
+	
+	// Move in Circle
+	/*setPosX(getMI()->_window->getWidth()/2.0f + getRadius() * cos(getAngleZRadian()));
+	setPosY(getMI()->_window->getHeight()/2.0f + getRadius() * sin(getAngleZRadian()));*/
 
-	setPosX(getMI()->_window->getWidth()/2.0f + getRadius() * cos(getAngleZRadian()));
-	setPosY(getMI()->_window->getHeight()/2.0f + getRadius() * sin(getAngleZRadian()));
+	// Move in Ellipse
+	setPosX(getMI()->_window->getWidth() / 2.0f + (getMI()->_window->getWidth() - getWidth()) * cos(getAngleZRadian()) / 2.0f);
+	setPosY(getMI()->_window->getHeight() / 2.0f + (getMI()->_window->getHeight() - getHeight()) * sin(getAngleZRadian()) / 2.0f);
 }
 
 Planet::~Planet()

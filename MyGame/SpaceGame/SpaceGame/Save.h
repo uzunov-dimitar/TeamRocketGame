@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include "irrKlang.h"
 #include "ErrorHandler.h"
 #include "Planet.h"
 #include "Ship.h"
@@ -22,14 +23,17 @@ public:
 	void getLoadFile(ifstream*);
 	ofstream* getSaveFile() const;
 	void setSaveFile(ofstream*);
-
+	
+	// functions related to saving
 	void makeSave(CIndieLib*, Ship*, vector<Planet*>&);
-	void loadSave(CIndieLib*, Ship*&, vector<Planet*>&);
 
 	void writeLine(string, string);
 	void writeObject(string, Object*);
 	void writePlanet(Planet*, int);
 	void writeShip(Ship*);
+
+	// functions related to loading
+	void loadSave(CIndieLib*, Ship*&, vector<Planet*>&);
 
 	bool readLine(Ship*, vector<Planet*>&);
 	bool readObject(Object*, string&, string&);

@@ -1,6 +1,6 @@
 #include "Ship.h"
 
-Ship::Ship(int health, float acceleration, float maxSpeed) : health(health), speed(0.0f), acceleration(acceleration), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d())
+Ship::Ship(int health, float acceleration, float jolt, float maxSpeed) : health(health), speed(0.0f), acceleration(acceleration), jolt(jolt), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d()), soundEngine(NULL)
 {
 }
 
@@ -32,6 +32,16 @@ float Ship::getAcceleration() const
 void Ship::setAcceleration(float acceleration)
 {
 	this->acceleration = acceleration;
+}
+
+float Ship::getJolt() const
+{
+	return jolt;
+}
+
+void Ship::setJolt(float  jolt)
+{
+	this->jolt = jolt;
 }
 
 float Ship::getMaxSpeed() const
@@ -94,6 +104,16 @@ void Ship::setAnim2dShip(IND_Entity2d * mAnim2dShip)
 	this->mAnim2dShip = mAnim2dShip;
 }
 
+irrklang::ISoundEngine * Ship::getSoundEngine() const
+{
+	return soundEngine;
+}
+
+void Ship::setSoundEngine(irrklang::ISoundEngine* soundEngine)
+{
+	this->soundEngine = soundEngine;
+}
+
 void Ship::loadPropsAnim2d()
 {
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
@@ -105,8 +125,15 @@ void Ship::loadPropsAnim2d()
 void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, const float posY)
 {
 	setMI(mI);
-	initialize(mI);
 
+	setSoundEngine(irrklang::createIrrKlangDevice());
+
+	if (!getSoundEngine())
+	{
+		writeError(1000, 100, "SoundEngine", "can't create device.");
+	}
+	getSoundEngine()->play2D("irrKlang/media/v-start.wav", true);
+	getSoundEngine()->setAllSoundsPaused(true);
 	// Load Surface + Animations
 	setPathSurface(path);
 	getMI()->_surfaceManager->add(getSurface(), path, IND_ALPHA, IND_32);
@@ -148,17 +175,12 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 
 }
 
-void Ship::moveShip(Controls* controls)
+void Ship::moveShip(Controls* controls, float mDelta)
 {
-	// get delta time
-	float mDelta = getMI()->_render->getFrameTime() / 1000.0f;
-
-	// Set Rotated Animation and Restart the Sequence
 	// IMPORTANT: everytime the animation is reset, the properties of the mAnim2dShip are reset
 	// Use loadPropsAnim2d() at the end of the function
 
 	// Move or Deaccelerate
-
 	if (getMI()->_input->isKeyPressed(controls->getAdvance()))
 	{
 		getAnim2dShip()->setAnimation(getAnimationShip());
@@ -167,11 +189,19 @@ void Ship::moveShip(Controls* controls)
 		if (getMI()->_input->onKeyPress(controls->getAdvance()))
 		{
 			getAnim2dShip()->setSequence(0);
+
+			getSoundEngine()->setAllSoundsPaused(false);
 		}
+
+		
 
 		setPosX(getPosX() + getSpeed() * cos(getAngleZRadian()) * mDelta);
 		setPosY(getPosY() - getSpeed() * sin(getAngleZRadian()) * mDelta);
 		this->checkCoords();
+
+		setAcceleration(getAcceleration() + ((getSpeed() + getAcceleration()*mDelta) < getMaxSpeed() ?
+																									getJolt()*mDelta :
+																									0));
 
 		setSpeed(getSpeed() + ((getSpeed() + getAcceleration()*mDelta) < getMaxSpeed() ?
 																						getAcceleration()*mDelta :
@@ -181,7 +211,12 @@ void Ship::moveShip(Controls* controls)
 	{
 		getAnim2dShip()->setAnimation(getAnimationStill());
 
+		getSoundEngine()->setAllSoundsPaused(true);
 		// Deaccelerate
+
+		setAcceleration(getAcceleration() - (getAcceleration() > 0 ?
+																		getJolt()*mDelta :
+																		0));
 
 		setSpeed(getSpeed() - ((getSpeed() - getAcceleration()*mDelta) > 0 ?
 																			getAcceleration()*mDelta :
@@ -198,6 +233,8 @@ void Ship::moveShip(Controls* controls)
 		getAnim2dShip()->setAnimation(getMI()->_input->isKeyPressed(controls->getRotateLeft()) ?
 																								getAnimationLeft() : 
 																								getAnimationRight());
+
+		getSoundEngine()->setAllSoundsPaused(false);
 
 		// restart the animation on key press
 		if (getMI()->_input->onKeyPress(controls->getRotateLeft()) || getMI()->_input->onKeyPress(controls->getRotateRight()))
@@ -221,6 +258,7 @@ Ship::~Ship()
 	getMI()->_animationManager->remove(getAnimationLeft());
 	getMI()->_animationManager->remove(getAnimationRight());
 	getMI()->_entity2dManager->remove(getAnim2dShip());
+	getSoundEngine()->drop();
 	/*getAnimationShip()->destroy();
 	getAnimationStill()->destroy();
 	getAnimationLeft()->destroy();

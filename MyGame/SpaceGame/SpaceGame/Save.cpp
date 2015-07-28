@@ -54,29 +54,6 @@ void Save::makeSave(CIndieLib* mI, Ship* mShip, vector<Planet*>& mPlanets)
 	getSaveFile()->close();
 }
 
-void Save::loadSave(CIndieLib* mI, Ship*& mShip, vector<Planet*>& mPlanets)
-{
-	initialize(mI);
-	setMI(mI);
-	getLoadFile()->open("Saves/quickSave.txt", ios::in);
-	if (!getLoadFile()->is_open())
-	{
-		writeError(1000, 200, "Save", "Can't open file for reading!");
-		return;
-	}
-	delete mShip;
-	mShip = new Ship();
-	mShip->setMI(getMI());
-	for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
-	{
-		delete (*it);
-	}
-	mPlanets.clear();
-	writeError(1000, 100, "size", mPlanets.size());
-	while (readLine(mShip, mPlanets));
-	getLoadFile()->close();
-}
-
 void Save::writeLine(string key, string value)
 {
 	*getSaveFile() << "[" + key + "]=[" + value + "]\n";
@@ -92,7 +69,7 @@ void Save::writeObject(string name, Object* mObject)
 	writeLine(name + "-angleZ", to_string(mObject->getAngleZ()));
 }
 
-void Save::writePlanet(Planet * mPlanet, int i)
+void Save::writePlanet(Planet* mPlanet, int i)
 {
 	writeObject("planet" + to_string(i), mPlanet);
 }
@@ -103,11 +80,33 @@ void Save::writeShip(Ship* mShip)
 	writeLine("ship-health", to_string(mShip->getHealth()));
 	writeLine("ship-speed", to_string(mShip->getSpeed()));
 	writeLine("ship-acceleration", to_string(mShip->getAcceleration()));
+	writeLine("ship-jolt", to_string(mShip->getJolt()));
 	writeLine("ship-maxSpeed", to_string(mShip->getMaxSpeed()));
 	writeLine("ship-mAnimationStill", mShip->getAnimationStill()->getName());
 	writeLine("ship-mAnimationShip", mShip->getAnimationShip()->getName());
 	writeLine("ship-mAnimationLeft", mShip->getAnimationLeft()->getName());
 	writeLine("ship-mAnimationRight", mShip->getAnimationRight()->getName());
+}
+
+void Save::loadSave(CIndieLib* mI, Ship*& mShip, vector<Planet*>& mPlanets)
+{
+	initialize(mI);
+	setMI(mI);
+	getLoadFile()->open("Saves/quickSave.txt", ios::in);
+	if (!getLoadFile()->is_open())
+	{
+		writeError(1000, 200, "Save", "Can't open file for reading!");
+		return;
+	}
+	mShip = new Ship();
+	mShip->setMI(getMI());
+	while (readLine(mShip, mPlanets));
+	getLoadFile()->close();
+
+	getMI()->_input->update();
+	getMI()->_render->beginScene();
+	getMI()->_entity2dManager->renderEntities2d();
+	getMI()->_render->endScene();
 }
 
 bool Save::readLine(Ship* mShip, vector<Planet*>& mPlanets)
@@ -126,7 +125,6 @@ bool Save::readLine(Ship* mShip, vector<Planet*>& mPlanets)
 		else
 		{
 			int id = std::stoi(objectName.substr(objectName.find_first_of("t")+1));
-			writeError(1000, 100, "size", mPlanets.size());
 			if (mPlanets.size() <= id) 
 			{
 				mPlanets.push_back(new Planet());
@@ -181,7 +179,14 @@ bool Save::readObject(Object* mObject, string& property, string& value)
 	return false;
 }
 
-void Save::readShip(Ship * mShip, string& property, string& value)
+void Save::readPlanet(Planet* mPlanet, string& property, string& value)
+{
+	if (!readObject(mPlanet, property, value))
+	{
+	}
+}
+
+void Save::readShip(Ship* mShip, string& property, string& value)
 {
 	if (!readObject(mShip, property, value))
 	{
@@ -197,6 +202,10 @@ void Save::readShip(Ship * mShip, string& property, string& value)
 		{
 			mShip->setAcceleration(stof(value));
 		}
+		if (!property.compare("jolt"))
+		{
+			mShip->setJolt(stof(value));
+		}
 		if (!property.compare("maxSpeed"))
 		{
 			mShip->setMaxSpeed(stof(value));
@@ -207,6 +216,15 @@ void Save::readShip(Ship * mShip, string& property, string& value)
 			getMI()->_entity2dManager->add(mShip->getAnim2dShip());
 			mShip->getAnim2dShip()->setAnimation(mShip->getAnimationStill());
 			mShip->loadPropsAnim2d();
+
+			mShip->setSoundEngine(irrklang::createIrrKlangDevice());
+
+			if (!mShip->getSoundEngine())
+			{
+				writeError(1000, 100, "SoundEngine", "can't create device.");
+			}
+			mShip->getSoundEngine()->play2D("irrKlang/media/v-start.wav", true);
+			mShip->getSoundEngine()->setAllSoundsPaused(true);
 		}
 		if (!property.compare("mAnimationShip"))
 		{
@@ -220,13 +238,6 @@ void Save::readShip(Ship * mShip, string& property, string& value)
 		{
 			getMI()->_animationManager->addToSurface(mShip->getAnimationRight(), value.c_str(), IND_ALPHA, IND_32);
 		}
-	}
-}
-
-void Save::readPlanet(Planet* mPlanet, string& property, string& value)
-{
-	if (!readObject(mPlanet, property, value))
-	{
 	}
 }
 

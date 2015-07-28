@@ -109,7 +109,7 @@ CIndieLib * Object::getMI() const
 void Object::setMI(CIndieLib * mI)
 {
 	this->mI = mI;
-	// for the Errorhandler;
+	// for the ErrorHandler;
 	initialize(mI);
 }
 

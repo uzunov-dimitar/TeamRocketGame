@@ -11,7 +11,7 @@ public:
 	float getRadius()const;
 
 	void createPlanet(CIndieLib* const, const char*, const float, const float, const float);
-	void movePlanet();
+	void movePlanet(float);
 
 	~Planet();
 };
