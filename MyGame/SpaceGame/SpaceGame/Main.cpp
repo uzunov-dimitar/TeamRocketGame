@@ -40,10 +40,6 @@ int IndieLib()
 	
 	// Loading 2D Entities
 
-	IND_Surface *mSurface1 = IND_Surface::newSurface();
-	if (!mI->_surfaceManager->add(mSurface1, "resources/Backgrounds/18.jpg", IND_OPAQUE, IND_32)) return 0;
-	mI->_surfaceManager->remove(mSurface1);
-
 	IND_Entity2d* mBack = IND_Entity2d::newEntity2d();
 	mI->_entity2dManager->add(mBack);
 	mBack->setSurface(mSurfaceBack);
@@ -104,7 +100,7 @@ int IndieLib()
 		}
 		else
 		{
-			mShip->moveShip(controls, mDelta);
+			mShip->updateShip(controls, mDelta);
 			for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
 			{
 				(*it)->movePlanet(mDelta);

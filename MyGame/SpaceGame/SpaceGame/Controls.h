@@ -14,6 +14,7 @@ public:
 	IND_Key getAdvance();
 	IND_Key getRotateLeft();
 	IND_Key getRotateRight();
+	IND_Key getShoot();
 	IND_Key getQuickSave();
 	IND_Key getQuickLoad();
 

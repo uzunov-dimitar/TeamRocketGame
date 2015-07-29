@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Controls.cpp" />
     <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -95,6 +96,7 @@
     <ClCompile Include="tools\editor_tileless\CIndieLib.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Controls.h" />
     <ClInclude Include="ErrorHandler.h" />
     <ClInclude Include="Object.h" />

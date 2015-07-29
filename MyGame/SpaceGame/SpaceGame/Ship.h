@@ -3,6 +3,7 @@
 
 #include "irrKlang.h"
 #include "Object.h"
+#include "Bullet.h"
 #include "Controls.h"
 #include "IND_Animation.h"
 
@@ -13,12 +14,16 @@ private:
 	float acceleration;
 	float jolt;
 	float maxSpeed;
+
 	IND_Animation* mAnimationStill;
 	IND_Animation* mAnimationShip;
 	IND_Animation* mAnimationLeft;
 	IND_Animation* mAnimationRight;
 	IND_Entity2d* mAnim2dShip;
+
 	irrklang::ISoundEngine* soundEngine;
+
+	vector<Bullet*> mBullets;
 public:
 	Ship(int health = 100, float acceleration = 100.0f, float jolt = 50.0f, float maxSpeed = 400.0f);
 
@@ -46,10 +51,13 @@ public:
 	irrklang::ISoundEngine* getSoundEngine() const;
 	void setSoundEngine(irrklang::ISoundEngine*);
 
+	vector<Bullet*>& getBullets();
+	void setBullets(vector<Bullet*>);
+
 	void loadPropsAnim2d();
 
 	void createShip(CIndieLib* const, const char*, const float, const float);
-	void moveShip(Controls*, float);
+	void updateShip(Controls*, float);
 
 	~Ship();
 };

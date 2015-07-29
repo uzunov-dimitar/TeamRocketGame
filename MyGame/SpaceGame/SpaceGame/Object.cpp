@@ -12,7 +12,7 @@ float Object::getPosX() const
 void Object::setPosX(float posX)
 {
 	this->posX = posX;
-	getEntity2d()->setPosition(posX, getEntity2d()->getPosY(), 0);
+	getEntity2d()->setPosition(posX, getEntity2d()->getPosY(), getEntity2d()->getPosZ());
 }
 
 float Object::getPosY() const
@@ -23,7 +23,7 @@ float Object::getPosY() const
 void Object::setPosY(float posY)
 {
 	this->posY = posY;
-	getEntity2d()->setPosition(getEntity2d()->getPosX(), posY, 0);
+	getEntity2d()->setPosition(getEntity2d()->getPosX(), posY, getEntity2d()->getPosZ());
 }
 
 void Object::setPosition(float posX, float posY)
@@ -133,18 +133,20 @@ void Object::setEntity2d(IND_Entity2d * entity2d)
 	this->mEntity2d = entity2d;
 }
 
-void Object::checkCoords()
+bool Object::checkCoords()
 {
 	// Check for negative coordinates
-
+	bool outOfScreen = false;
 	if (getPosX() < 0)
 	{
 		setPosition(0, getPosY());
+		outOfScreen = true;
 	}
 
 	if (getPosY() < 0)
 	{
 		setPosition(getPosX(), 0);
+		outOfScreen = true;
 	}
 
 	// Check for too big coordinates
@@ -152,12 +154,15 @@ void Object::checkCoords()
 	if (getPosX() > getMI()->_window->getWidth())
 	{
 		setPosition(getMI()->_window->getWidth(), getPosY());
+		outOfScreen = true;
 	}
 
 	if (getPosY() > getMI()->_window->getHeight())
 	{
 		setPosition(getPosX(), getMI()->_window->getHeight());
+		outOfScreen = true;
 	}
+	return outOfScreen;
 }
 
 Object::~Object()

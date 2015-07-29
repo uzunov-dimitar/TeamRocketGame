@@ -114,6 +114,16 @@ void Ship::setSoundEngine(irrklang::ISoundEngine* soundEngine)
 	this->soundEngine = soundEngine;
 }
 
+vector<Bullet*>& Ship::getBullets()
+{
+	return mBullets;
+}
+
+void Ship::setBullets(vector<Bullet*> mBullets)
+{
+	this->mBullets = mBullets;
+}
+
 void Ship::loadPropsAnim2d()
 {
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
@@ -126,14 +136,18 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 {
 	setMI(mI);
 
+	// Sound:
 	setSoundEngine(irrklang::createIrrKlangDevice());
 
 	if (!getSoundEngine())
 	{
 		writeError(1000, 100, "SoundEngine", "can't create device.");
 	}
+
 	getSoundEngine()->play2D("irrKlang/media/v-start.wav", true);
+	getSoundEngine()->setSoundVolume(0.1f);
 	getSoundEngine()->setAllSoundsPaused(true);
+
 	// Load Surface + Animations
 	setPathSurface(path);
 	getMI()->_surfaceManager->add(getSurface(), path, IND_ALPHA, IND_32);
@@ -153,6 +167,7 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 
 	getEntity2d()->setSurface(getSurface());
 	getEntity2d()->setHotSpot(0.5f, 0.5f); // comment out to see both entity2d and mAnim2dShip
+	getEntity2d()->setPosition(0, 0, 1);
 	setPosition(posX, posY);
 
 	getAnim2dShip()->setAnimation(getAnimationStill());
@@ -167,7 +182,9 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 	int winHeight = getMI()->_window->getHeight();
 	float entWidth = getSurface()->getWidth();
 	float entHeight = getSurface()->getHeight();
-	float scale = ((0.05*(winWidth / entWidth)) < (0.15*(winHeight / entHeight)) ? (0.05*(winWidth / entWidth)) : (0.15*(winHeight / entHeight)));
+	float scale = ((0.05*(winWidth / entWidth)) < (0.15*(winHeight / entHeight)) ?
+																				(0.05*(winWidth / entWidth)) :
+																				(0.15*(winHeight / entHeight)));
 
 	// scaleX and scaleY are always equal
 	setScale(scale, scale);
@@ -175,7 +192,7 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 
 }
 
-void Ship::moveShip(Controls* controls, float mDelta)
+void Ship::updateShip(Controls* controls, float mDelta)
 {
 	// IMPORTANT: everytime the animation is reset, the properties of the mAnim2dShip are reset
 	// Use loadPropsAnim2d() at the end of the function
@@ -246,7 +263,23 @@ void Ship::moveShip(Controls* controls, float mDelta)
 
 		setAngleZ(getAngleZ() + (getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? -1 : 1) * 180 * mDelta);
 	}
+	
+	if (getMI()->_input->onKeyPress(controls->getShoot()))
+	{
+		getBullets().push_back(new Bullet());
+		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() - M_PI / 6.0f)/3.0f, getPosY() - getWidth()*sin(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getAngleZ());
+	}
 
+	// Manage Bullets:
+	for (vector<Bullet*>::iterator it = getBullets().begin(); it < getBullets().end(); ++it)
+	{
+			if ((*it)->updateBullet(mDelta))
+			{
+				vector<Bullet*>::iterator it2 = it;
+				delete (*it);
+				getBullets().erase(it);
+			}
+	}
 	// load back the properties into mAnim2dShip
 	this->loadPropsAnim2d();
 }
@@ -259,6 +292,11 @@ Ship::~Ship()
 	getMI()->_animationManager->remove(getAnimationRight());
 	getMI()->_entity2dManager->remove(getAnim2dShip());
 	getSoundEngine()->drop();
+	for (vector<Bullet*>::iterator it = getBullets().begin(); it != getBullets().end(); ++it)
+	{
+			delete (*it);
+	}
+	getBullets().clear();
 	/*getAnimationShip()->destroy();
 	getAnimationStill()->destroy();
 	getAnimationLeft()->destroy();

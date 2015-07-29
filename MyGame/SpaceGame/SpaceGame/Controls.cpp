@@ -15,6 +15,11 @@ IND_Key Controls::getRotateRight()
 	return keyMap["rotateRight"];
 }
 
+IND_Key Controls::getShoot()
+{
+	return keyMap["shoot"];
+}
+
 IND_Key Controls::getQuickSave()
 {
 	return keyMap["quickSave"];

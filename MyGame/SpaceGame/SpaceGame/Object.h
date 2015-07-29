@@ -49,7 +49,7 @@ public:
 	IND_Entity2d* getEntity2d() const;
 	void setEntity2d(IND_Entity2d*);
 
-	void checkCoords();
+	bool checkCoords();
 
 	virtual ~Object();
 };
