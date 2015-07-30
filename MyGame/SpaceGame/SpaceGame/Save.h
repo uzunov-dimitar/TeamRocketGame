@@ -5,6 +5,7 @@
 #include <string>
 #include "irrKlang.h"
 #include "ErrorHandler.h"
+#include "Bullet.h"
 #include "Planet.h"
 #include "Ship.h"
 
@@ -38,6 +39,7 @@ public:
 	bool readLine(Ship*, vector<Planet*>&);
 	bool readObject(Object*, string&, string&);
 	void readShip(Ship*, string&, string&);
+	void readBullet(Bullet*, string&, string&);
 	void readPlanet(Planet*, string&, string&);
 
 	~Save();

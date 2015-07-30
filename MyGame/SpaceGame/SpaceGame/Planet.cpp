@@ -11,18 +11,19 @@ float Planet::getRadius() const
 
 void Planet::createPlanet(CIndieLib * const mI, const char * path, const float posX, const float posY, const float percent)
 {
+	
+	
 	// Initialize the master instance + error handler
-	setMI(mI);
+	setMI(mI); //create
 
 	// Manage the surface
-	setPathSurface(path);
-	getMI()->_surfaceManager->add(getSurface(), path, IND_ALPHA, IND_32);
+	setPathSurface(path); //
 
-	// Manage the 2d entity
 	getMI()->_entity2dManager->add(getEntity2d());
-	getEntity2d()->setSurface(getSurface());
-
-	getEntity2d()->setHotSpot(0.5f, 0.5f);
+	getEntity2d()->setHotSpot(0.5f, 0.5f); // <-O
+	
+	// Manage the 2d entity
+	
 	setPosition(posX, posY);
 
 	// Set Scale

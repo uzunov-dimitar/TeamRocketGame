@@ -99,6 +99,8 @@ char * Object::getPathSurface() const
 void Object::setPathSurface(const char * pathSurface)
 {
 	strncpy(this->pathSurface, pathSurface, 99);
+	getMI()->_surfaceManager->add(getSurface(), getPathSurface(), IND_ALPHA, IND_32);
+	getEntity2d()->setSurface(getSurface());
 }
 
 CIndieLib * Object::getMI() const

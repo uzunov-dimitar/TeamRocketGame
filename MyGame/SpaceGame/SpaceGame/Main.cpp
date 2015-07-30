@@ -69,7 +69,7 @@ int IndieLib()
 		mPlanets.back()->setAngleZ(-randDegree / M_PI * 180);
 	}
 
-	Ship* mShip = new Ship(100, 0, winWidth/26.0f, winWidth/3.0f);
+	Ship* mShip = new Ship(100, 0, winWidth/20.0f, winWidth/3.0f);
 	mShip->createShip(mI, "resources/Spaceship with motor new/1.png", winWidth/2, winHeight/2);
 
 	bool loadSave = false;

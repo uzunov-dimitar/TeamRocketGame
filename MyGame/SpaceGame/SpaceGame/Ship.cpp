@@ -114,6 +114,38 @@ void Ship::setSoundEngine(irrklang::ISoundEngine* soundEngine)
 	this->soundEngine = soundEngine;
 }
 
+irrklang::ISound* Ship::getRocketSound() const
+{
+	return rocketSound;
+}
+
+void Ship::setRocketSound(irrklang::ISound* rocketSound)
+{
+	this->rocketSound = rocketSound;
+	this->rocketSound->setVolume(0.1f);
+}
+
+irrklang::ISoundSource * Ship::getBlasterSoundSource() const
+{
+	return blasterSoundSource;
+}
+
+void Ship::setBlasterSoundSource(irrklang::ISoundSource* blasterSoundSource)
+{
+	this->blasterSoundSource = blasterSoundSource;
+	this->blasterSoundSource->setDefaultVolume(0.1f);
+}
+
+irrklang::ISound* Ship::getBlasterSound() const
+{
+	return blasterSound;
+}
+
+void Ship::setBlasterSound(irrklang::ISound* blasterSound)
+{
+	this->blasterSound = blasterSound;
+}
+
 vector<Bullet*>& Ship::getBullets()
 {
 	return mBullets;
@@ -144,13 +176,13 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 		writeError(1000, 100, "SoundEngine", "can't create device.");
 	}
 
-	getSoundEngine()->play2D("irrKlang/media/v-start.wav", true);
+	setRocketSound(getSoundEngine()->play2D("irrKlang/media/v-start.wav", true, true, true));
+	setBlasterSoundSource(getSoundEngine()->addSoundSourceFromFile("irrKlang/media/blaster.wav"));
+	setBlasterSound(getSoundEngine()->play2D("irrKlang/media/blaster.wav", false, true, true));
 	getSoundEngine()->setSoundVolume(0.1f);
-	getSoundEngine()->setAllSoundsPaused(true);
 
 	// Load Surface + Animations
 	setPathSurface(path);
-	getMI()->_surfaceManager->add(getSurface(), path, IND_ALPHA, IND_32);
 
 	getMI()->_animationManager->addToSurface(getAnimationShip(), "resources/Spaceship with motor new/Ship_advance.xml", IND_ALPHA, IND_32);
 
@@ -165,7 +197,6 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 	getMI()->_entity2dManager->add(getEntity2d());
 	getMI()->_entity2dManager->add(getAnim2dShip());
 
-	getEntity2d()->setSurface(getSurface());
 	getEntity2d()->setHotSpot(0.5f, 0.5f); // comment out to see both entity2d and mAnim2dShip
 	getEntity2d()->setPosition(0, 0, 1);
 	setPosition(posX, posY);
@@ -197,6 +228,25 @@ void Ship::updateShip(Controls* controls, float mDelta)
 	// IMPORTANT: everytime the animation is reset, the properties of the mAnim2dShip are reset
 	// Use loadPropsAnim2d() at the end of the function
 
+	// Check if shoot was pressed
+	if (getMI()->_input->onKeyPress(controls->getShoot()))
+	{
+		getBlasterSound()->setIsPaused(false);
+		if (getBlasterSound()->isFinished())
+		{
+			getBlasterSound()->drop();
+			setBlasterSound(getSoundEngine()->play2D(getBlasterSoundSource(), false, false, true));
+		}
+		else
+		{
+			getBlasterSound()->setPlayPosition(0);
+		}
+		getBullets().push_back(new Bullet());
+		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getAngleZ());
+		getBullets().push_back(new Bullet());
+		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getAngleZ());
+	}
+
 	// Move or Deaccelerate
 	if (getMI()->_input->isKeyPressed(controls->getAdvance()))
 	{
@@ -207,7 +257,7 @@ void Ship::updateShip(Controls* controls, float mDelta)
 		{
 			getAnim2dShip()->setSequence(0);
 
-			getSoundEngine()->setAllSoundsPaused(false);
+			getRocketSound()->setIsPaused(false);
 		}
 
 		
@@ -228,7 +278,7 @@ void Ship::updateShip(Controls* controls, float mDelta)
 	{
 		getAnim2dShip()->setAnimation(getAnimationStill());
 
-		getSoundEngine()->setAllSoundsPaused(true);
+		getRocketSound()->setIsPaused(true);
 		// Deaccelerate
 
 		setAcceleration(getAcceleration() - (getAcceleration() > 0 ?
@@ -251,7 +301,7 @@ void Ship::updateShip(Controls* controls, float mDelta)
 																								getAnimationLeft() : 
 																								getAnimationRight());
 
-		getSoundEngine()->setAllSoundsPaused(false);
+		getRocketSound()->setIsPaused(false);
 
 		// restart the animation on key press
 		if (getMI()->_input->onKeyPress(controls->getRotateLeft()) || getMI()->_input->onKeyPress(controls->getRotateRight()))
@@ -262,12 +312,6 @@ void Ship::updateShip(Controls* controls, float mDelta)
 		// Rotate with 180 degrees per second
 
 		setAngleZ(getAngleZ() + (getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? -1 : 1) * 180 * mDelta);
-	}
-	
-	if (getMI()->_input->onKeyPress(controls->getShoot()))
-	{
-		getBullets().push_back(new Bullet());
-		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() - M_PI / 6.0f)/3.0f, getPosY() - getWidth()*sin(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getAngleZ());
 	}
 
 	// Manage Bullets:

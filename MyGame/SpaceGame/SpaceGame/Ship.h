@@ -22,6 +22,9 @@ private:
 	IND_Entity2d* mAnim2dShip;
 
 	irrklang::ISoundEngine* soundEngine;
+	irrklang::ISound* rocketSound;
+	irrklang::ISoundSource* blasterSoundSource;
+	irrklang::ISound* blasterSound;
 
 	vector<Bullet*> mBullets;
 public:
@@ -48,8 +51,15 @@ public:
 	void setAnimationRight(IND_Animation*);
 	IND_Entity2d* getAnim2dShip() const;
 	void setAnim2dShip(IND_Entity2d*);
+
 	irrklang::ISoundEngine* getSoundEngine() const;
 	void setSoundEngine(irrklang::ISoundEngine*);
+	irrklang::ISound* getRocketSound() const;
+	void setRocketSound(irrklang::ISound*);
+	irrklang::ISoundSource* getBlasterSoundSource() const;
+	void setBlasterSoundSource(irrklang::ISoundSource*);
+	irrklang::ISound* getBlasterSound() const;
+	void setBlasterSound(irrklang::ISound*);
 
 	vector<Bullet*>& getBullets();
 	void setBullets(vector<Bullet*>);

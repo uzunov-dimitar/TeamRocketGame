@@ -86,6 +86,13 @@ void Save::writeShip(Ship* mShip)
 	writeLine("ship-mAnimationShip", mShip->getAnimationShip()->getName());
 	writeLine("ship-mAnimationLeft", mShip->getAnimationLeft()->getName());
 	writeLine("ship-mAnimationRight", mShip->getAnimationRight()->getName());
+	int i = 0;
+	for (vector<Bullet*>::iterator it = mShip->getBullets().begin(); it != mShip->getBullets().end(); ++it)
+	{
+		// So far a bullet does not have any additional properties compared to an Object
+		writeObject("bullet" + to_string(i), *it);
+		i++;
+	}
 }
 
 void Save::loadSave(CIndieLib* mI, Ship*& mShip, vector<Planet*>& mPlanets)
@@ -118,14 +125,24 @@ bool Save::readLine(Ship* mShip, vector<Planet*>& mPlanets)
 		string property = line.substr(line.find_first_of("-") + 1, line.find_first_of("]") - line.find_first_of("-") - 1);
 		line = line.substr(line.find_first_of("=")+1);
 		string value = line.substr(line.find_first_of("=") + 2, line.find_first_of("]") - line.find_first_of("[") - 1);
-		if (!objectName.compare(0, 6, "ship"))
+		if (!objectName.compare(0, 6, "ship") )
 		{
 			readShip(mShip, property, value);
 		}
-		else
+		else if (!objectName.compare(0, 6, "bullet"))
 		{
 			int id = std::stoi(objectName.substr(objectName.find_first_of("t")+1));
-			if (mPlanets.size() <= id) 
+			if (mShip->getBullets().size() <= id) 
+			{
+				mShip->getBullets().push_back(new Bullet());
+				mShip->getBullets().back()->setMI(getMI());
+			}
+			readBullet(mShip->getBullets().back(), property, value);
+		}
+		else
+		{
+			int id = std::stoi(objectName.substr(objectName.find_first_of("t") + 1));
+			if (mPlanets.size() <= id)
 			{
 				mPlanets.push_back(new Planet());
 				mPlanets.back()->setMI(getMI());
@@ -170,20 +187,11 @@ bool Save::readObject(Object* mObject, string& property, string& value)
 	if (!property.compare("pathSurface"))
 	{
 		mObject->setPathSurface(value.c_str());
-		getMI()->_surfaceManager->add(mObject->getSurface(), mObject->getPathSurface(), IND_ALPHA, IND_32);
 		getMI()->_entity2dManager->add(mObject->getEntity2d());
-		mObject->getEntity2d()->setSurface(mObject->getSurface());
 		mObject->getEntity2d()->setHotSpot(0.5f, 0.5f);
 		return true;
 	}
 	return false;
-}
-
-void Save::readPlanet(Planet* mPlanet, string& property, string& value)
-{
-	if (!readObject(mPlanet, property, value))
-	{
-	}
 }
 
 void Save::readShip(Ship* mShip, string& property, string& value)
@@ -212,19 +220,25 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		}
 		if (!property.compare("mAnimationStill"))
 		{
+			//Manage the animation
 			getMI()->_animationManager->addToSurface(mShip->getAnimationStill(), value.c_str(), IND_ALPHA, IND_32);
 			getMI()->_entity2dManager->add(mShip->getAnim2dShip());
 			mShip->getAnim2dShip()->setAnimation(mShip->getAnimationStill());
 			mShip->loadPropsAnim2d();
 
+			mShip->getEntity2d()->setPosition(mShip->getPosX(), mShip->getPosY(), 1);
+
+			// Manage Sound
 			mShip->setSoundEngine(irrklang::createIrrKlangDevice());
 
 			if (!mShip->getSoundEngine())
 			{
 				writeError(1000, 100, "SoundEngine", "can't create device.");
 			}
-			mShip->getSoundEngine()->play2D("irrKlang/media/v-start.wav", true);
-			mShip->getSoundEngine()->setAllSoundsPaused(true);
+			mShip->setRocketSound(mShip->getSoundEngine()->play2D("irrKlang/media/v-start.wav", true, true, true));
+			mShip->setBlasterSoundSource(mShip->getSoundEngine()->addSoundSourceFromFile("irrKlang/media/blaster.wav"));
+			mShip->setBlasterSound(mShip->getSoundEngine()->play2D("irrKlang/media/blaster.wav", false, true, true));
+			mShip->getSoundEngine()->setSoundVolume(0.1f);
 		}
 		if (!property.compare("mAnimationShip"))
 		{
@@ -238,6 +252,22 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		{
 			getMI()->_animationManager->addToSurface(mShip->getAnimationRight(), value.c_str(), IND_ALPHA, IND_32);
 		}
+	}
+}
+
+void Save::readBullet(Bullet* mBullet, string& property, string& value)
+{
+	if (!readObject(mBullet, property, value))
+	{
+		// No additional properties to read
+	}
+}
+
+void Save::readPlanet(Planet* mPlanet, string& property, string& value)
+{
+	if (!readObject(mPlanet, property, value))
+	{
+		// No additional properties to read
 	}
 }
 
