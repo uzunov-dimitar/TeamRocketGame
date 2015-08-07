@@ -1,56 +1,126 @@
 #include "Planet.h"
 
-Planet::Planet()
+Planet::Planet() : circleTrajectory(false), orbitRadius(0)
 {
 }
 
-float Planet::getRadius() const
+bool Planet::isCircletrajectory() const
 {
-	return (getMI()->_window->getHeight() - getHeight())/2.0f;
+	return circleTrajectory;
 }
 
-void Planet::createPlanet(CIndieLib * const mI, const char * path, const float posX, const float posY, const float percent)
+void Planet::setCircleTrajectory(bool circleTrajectory)
 {
-	
-	
+	this->circleTrajectory = circleTrajectory;
+}
+
+float Planet::getOrbitRadius() const
+{
+	return orbitRadius;
+}
+
+void Planet::setOrbitRadius(float orbitRadius)
+{
+	this->orbitRadius = orbitRadius;
+}
+
+vector<Satellite*>& Planet::getSatellites()
+{
+	return mSatellites;
+}
+
+void Planet::setSatellites(vector<Satellite*> mSatellites)
+{
+	this->mSatellites = mSatellites;
+}
+
+void Planet::createPlanet(CIndieLib * const mI, const char * path, const float posX, const float posY, const float angleZRadian, const float scalePercent, const bool circleTrajectory, const float orbitRadius)
+{
 	// Initialize the master instance + error handler
-	setMI(mI); //create
+	setMI(mI);
 
 	// Manage the surface
-	setPathSurface(path); //
+	setPathSurface(path);
 
+	// Manage the 2d entity
 	getMI()->_entity2dManager->add(getEntity2d());
 	getEntity2d()->setHotSpot(0.5f, 0.5f); // <-O
-	
-	// Manage the 2d entity
-	
+
 	setPosition(posX, posY);
+	setAngleZ(angleZRadian / M_PI * 180);
 
 	// Set Scale
 	int winWidth = getMI()->_window->getWidth();
 	int winHeight = getMI()->_window->getHeight();
 	float entWidth = getSurface()->getWidth();
 	float entHeight = getSurface()->getHeight();
-	float scale = ((percent*(winWidth / entWidth)) < (percent*(winHeight / entHeight)) ?
-																					(percent*(winWidth / entWidth)) :
-																					(percent*(winHeight / entHeight)));
+	float scale = ((scalePercent*(winWidth / entWidth)) < (scalePercent*(winHeight / entHeight)) ?
+																					(scalePercent*(winWidth / entWidth)) :
+																					(scalePercent*(winHeight / entHeight)));
 	setScale(scale, scale);
+
+	setCircleTrajectory(circleTrajectory);
+	setOrbitRadius(orbitRadius);
 }
 
-void Planet::movePlanet(float mDelta)
+bool Planet::addSatellite()
+{
+	if (getSatellites().size() < 2)
+	{
+		getSatellites().push_back(new Satellite());
+		float orbitSatellite = (getWidth() + 0.065f * getMI()->_window->getHeight()) / 2.0f;
+		if (getSatellites().size() == 1)
+		{
+			getSatellites().back()->createSatellite(getMI(), ("resources/Planets/" + to_string(rand()%8+1) + ".png").c_str(), getPosX(), getPosY(), getAngleZ(), orbitSatellite);
+		}
+		else
+		{
+			getSatellites().back()->createSatellite(getMI(), ("resources/Planets/" + to_string(rand() % 8 + 1) + ".png").c_str(), getPosX(), getPosY(), getSatellites().at(0)->getAngleZ()+31 + rand()%300, orbitSatellite);
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void Planet::updatePlanet(float mDelta)
 {
 	// move at 45 degrees per second
-	setAngleZ(getAngleZ() + (45 * mDelta));
-	
-	// Move in Circle
-	/*setPosX(getMI()->_window->getWidth()/2.0f + getRadius() * cos(getAngleZRadian()));
-	setPosY(getMI()->_window->getHeight()/2.0f + getRadius() * sin(getAngleZRadian()));*/
+	setAngleZ(getAngleZ() - (45 * mDelta));
 
-	// Move in Ellipse
-	setPosX(getMI()->_window->getWidth() / 2.0f + (getMI()->_window->getWidth() - getWidth()) * cos(getAngleZRadian()) / 2.0f);
-	setPosY(getMI()->_window->getHeight() / 2.0f + (getMI()->_window->getHeight() - getHeight()) * sin(getAngleZRadian()) / 2.0f);
+	if (isCircletrajectory())
+	{
+		moveInCircle();
+	}
+	else
+	{
+		moveInEllipse();
+	}
+	for (vector<Satellite*>::iterator it = getSatellites().begin(); it != getSatellites().end(); ++it)
+	{
+		(*it)->updateSatellite(getPosX(), getPosY(), mDelta);
+	}
+}
+
+void Planet::moveInCircle()
+{
+	setPosX(getMI()->_window->getWidth() / 2.0f + getOrbitRadius() * cos(-getAngleZRadian()));
+	setPosY(getMI()->_window->getHeight() / 2.0f + getOrbitRadius() * sin(-getAngleZRadian()));
+}
+
+void Planet::moveInEllipse()
+{
+	setPosX(getMI()->_window->getWidth() / 2.0f + (getOrbitRadius() / getMI()->_window->getHeight()) * getMI()->_window->getWidth() * cos(-getAngleZRadian()));
+	setPosY(getMI()->_window->getHeight() / 2.0f + getOrbitRadius() * sin(-getAngleZRadian()));
 }
 
 Planet::~Planet()
 {
+	for (vector<Satellite*>::iterator it = getSatellites().begin(); it != getSatellites().end(); ++it)
+	{
+		delete (*it);
+	}
+	getSatellites().clear();
 }

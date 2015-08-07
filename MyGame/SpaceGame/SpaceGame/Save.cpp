@@ -12,6 +12,7 @@ CIndieLib * Save::getMI() const
 void Save::setMI(CIndieLib* mI)
 {
 	this->mI = mI;
+	initialize(mI);
 }
 
 ifstream * Save::getLoadFile() const
@@ -36,7 +37,6 @@ void Save::setSaveFile(ofstream* saveFile)
 
 void Save::makeSave(CIndieLib* mI, Ship* mShip, vector<Planet*>& mPlanets)
 {
-	initialize(mI);
 	setMI(mI);
 	getSaveFile()->open("Saves/quickSave.txt", ios::trunc);
 	if (!getSaveFile()->is_open())
@@ -72,12 +72,28 @@ void Save::writeObject(string name, Object* mObject)
 void Save::writePlanet(Planet* mPlanet, int i)
 {
 	writeObject("planet" + to_string(i), mPlanet);
+	writeLine("planet" + to_string(i) + "-circleTrajectory", to_string(mPlanet->isCircletrajectory()));
+	writeLine("planet" + to_string(i) + "-orbitRadius", to_string(mPlanet->getOrbitRadius()));
+	short int id = 0;
+	for (vector<Satellite*>::iterator it = mPlanet->getSatellites().begin(); it != mPlanet->getSatellites().end(); ++it)
+	{
+		writeSatellite("planet" + to_string(i) + "-satellite" + to_string(id), *it);
+		id++;
+	}
+}
+
+void Save::writeSatellite(string name, Satellite* mSatellite)
+{
+	writeObject(name, mSatellite);
+	writeLine(name + "-orbitRadius", to_string(mSatellite->getOrbitRadius()));
 }
 
 void Save::writeShip(Ship* mShip)
 {
 	writeObject("ship", mShip);
 	writeLine("ship-health", to_string(mShip->getHealth()));
+	writeLine("ship-numFiredBullets", to_string(mShip->getNumFiredBullets()));
+	writeLine("ship-score", to_string(mShip->getScore()));
 	writeLine("ship-speed", to_string(mShip->getSpeed()));
 	writeLine("ship-acceleration", to_string(mShip->getAcceleration()));
 	writeLine("ship-jolt", to_string(mShip->getJolt()));
@@ -97,7 +113,6 @@ void Save::writeShip(Ship* mShip)
 
 void Save::loadSave(CIndieLib* mI, Ship*& mShip, vector<Planet*>& mPlanets)
 {
-	initialize(mI);
 	setMI(mI);
 	getLoadFile()->open("Saves/quickSave.txt", ios::in);
 	if (!getLoadFile()->is_open())
@@ -194,6 +209,46 @@ bool Save::readObject(Object* mObject, string& property, string& value)
 	return false;
 }
 
+void Save::readPlanet(Planet* mPlanet, string& property, string& value)
+{
+	if (!readObject(mPlanet, property, value))
+	{
+		if (!property.compare("circleTrajectory"))
+		{
+			mPlanet->setCircleTrajectory(stoi(value));
+		}
+		if (!property.compare("orbitRadius"))
+		{
+			mPlanet->setOrbitRadius(stof(value));
+		}
+		if (!property.compare(0, 9, "satellite"))
+		{
+			// extract the serial number of the satellite
+			int id = std::stoi(property.substr(9, 1));
+			if (mPlanet->getSatellites().size() <= id)
+			{
+				mPlanet->getSatellites().push_back(new Satellite());
+				mPlanet->getSatellites().back()->setMI(getMI());
+			}
+
+			// change property so that it contains only the actual property of the satellite
+			property = property.substr(property.find_first_of("-") + 1, property.find_first_of("]") - property.find_first_of("-") - 1);
+			readSatellite(mPlanet->getSatellites().back(), property, value);
+		}
+	}
+}
+
+void Save::readSatellite(Satellite* mSatellite, string& property, string& value)
+{
+	if (!readObject(mSatellite, property, value))
+	{
+		if (!property.compare("orbitRadius"))
+		{
+			mSatellite->setOrbitRadius(stof(value));
+		}
+	}
+}
+
 void Save::readShip(Ship* mShip, string& property, string& value)
 {
 	if (!readObject(mShip, property, value))
@@ -201,6 +256,14 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		if (!property.compare("health"))
 		{
 			mShip->setHealth(stoi(value));
+		}
+		if (!property.compare("numFiredBullets"))
+		{
+			mShip->setNumFiredBullets(stoi(value));
+		}
+		if (!property.compare("score"))
+		{
+			mShip->setScore(stoi(value));
 		}
 		if (!property.compare("speed"))
 		{
@@ -258,14 +321,6 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 void Save::readBullet(Bullet* mBullet, string& property, string& value)
 {
 	if (!readObject(mBullet, property, value))
-	{
-		// No additional properties to read
-	}
-}
-
-void Save::readPlanet(Planet* mPlanet, string& property, string& value)
-{
-	if (!readObject(mPlanet, property, value))
 	{
 		// No additional properties to read
 	}

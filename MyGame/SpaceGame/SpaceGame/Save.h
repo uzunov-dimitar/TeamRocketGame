@@ -31,6 +31,7 @@ public:
 	void writeLine(string, string);
 	void writeObject(string, Object*);
 	void writePlanet(Planet*, int);
+	void writeSatellite(string, Satellite*);
 	void writeShip(Ship*);
 
 	// functions related to loading
@@ -38,9 +39,10 @@ public:
 
 	bool readLine(Ship*, vector<Planet*>&);
 	bool readObject(Object*, string&, string&);
+	void readPlanet(Planet*, string&, string&);
+	void readSatellite(Satellite*, string&, string&);
 	void readShip(Ship*, string&, string&);
 	void readBullet(Bullet*, string&, string&);
-	void readPlanet(Planet*, string&, string&);
 
 	~Save();
 };

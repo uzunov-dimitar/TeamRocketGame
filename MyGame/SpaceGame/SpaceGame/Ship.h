@@ -10,6 +10,8 @@
 class Ship : public Object {
 private:
 	int health;
+	int numFiredBullets;
+	int score;
 	float speed;
 	float acceleration;
 	float jolt;
@@ -28,10 +30,15 @@ private:
 
 	vector<Bullet*> mBullets;
 public:
-	Ship(int health = 100, float acceleration = 100.0f, float jolt = 50.0f, float maxSpeed = 400.0f);
+	Ship(int health = 100, int numFiredBullets = 0, int score = 0, float acceleration = 100.0f, float jolt = 50.0f, float maxSpeed = 400.0f);
 
 	int getHealth() const;
 	void setHealth(int);
+	int getNumFiredBullets() const;
+	void setNumFiredBullets(int);
+	int getScore()const;
+	void setScore(int);
+
 	float getSpeed() const;
 	void setSpeed(float);
 	float getAcceleration() const;

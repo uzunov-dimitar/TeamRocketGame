@@ -48,6 +48,7 @@ void ErrorHandler::initialize(CIndieLib * mI)
 		getText2d()->setFont(getFont());
 
 		getText2d()->setAlign(IND_CENTER);
+
 		setInitialized(true);
 	}
 }

@@ -1,6 +1,6 @@
 #include "Ship.h"
 
-Ship::Ship(int health, float acceleration, float jolt, float maxSpeed) : health(health), speed(0.0f), acceleration(acceleration), jolt(jolt), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d()), soundEngine(NULL)
+Ship::Ship(int health, int numFiredBullets, int score, float acceleration, float jolt, float maxSpeed) : health(health), numFiredBullets(numFiredBullets), score(score), speed(0.0f), acceleration(acceleration), jolt(jolt), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d()), soundEngine(NULL)
 {
 }
 
@@ -12,6 +12,26 @@ int Ship::getHealth() const
 void Ship::setHealth(int health)
 {
 	this->health = health;
+}
+
+int Ship::getNumFiredBullets() const
+{
+	return numFiredBullets;
+}
+
+void Ship::setNumFiredBullets(int numFiredBullets)
+{
+	this->numFiredBullets = numFiredBullets;
+}
+
+int Ship::getScore() const
+{
+	return score;
+}
+
+void Ship::setScore(int score)
+{
+	this->score = score;
 }
 
 float Ship::getSpeed() const
@@ -245,6 +265,8 @@ void Ship::updateShip(Controls* controls, float mDelta)
 		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getAngleZ());
 		getBullets().push_back(new Bullet());
 		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getAngleZ());
+
+		setNumFiredBullets(getNumFiredBullets() + 2);
 	}
 
 	// Move or Deaccelerate
@@ -341,9 +363,4 @@ Ship::~Ship()
 			delete (*it);
 	}
 	getBullets().clear();
-	/*getAnimationShip()->destroy();
-	getAnimationStill()->destroy();
-	getAnimationLeft()->destroy();
-	getAnimationRight()->destroy();
-	getAnim2dShip()->destroy();*/
 }

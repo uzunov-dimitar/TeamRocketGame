@@ -18,8 +18,8 @@ void Bullet::createBullet(CIndieLib*const mI, const char* path, float posX, floa
 
 bool Bullet::updateBullet(float mDelta)
 {
-	setPosX(getPosX() + getMI()->_window->getWidth() * cos(getAngleZRadian()) * mDelta / 2.0f);
-	setPosY(getPosY() - getMI()->_window->getWidth() * sin(getAngleZRadian()) * mDelta / 2.0f);
+	setPosX(getPosX() + getMI()->_window->getWidth() * cos(getAngleZRadian()) * mDelta);
+	setPosY(getPosY() - getMI()->_window->getWidth() * sin(getAngleZRadian()) * mDelta);
 
 	return this->checkCoords();
 }

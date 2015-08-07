@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bounding_areas>
+	<triangle id="cursor_point" ax="0" ay="0" bx="0" by="16" cx="12" cy="12" />
+</bounding_areas>

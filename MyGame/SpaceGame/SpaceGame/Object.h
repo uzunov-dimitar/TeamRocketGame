@@ -43,7 +43,7 @@ public:
 	void setPathSurface(const char*);
 
 	CIndieLib* getMI() const;
-	void setMI(CIndieLib*);
+	void setMI(CIndieLib*const);
 	IND_Surface* getSurface() const;
 	void setSurface(IND_Surface*);
 	IND_Entity2d* getEntity2d() const;
