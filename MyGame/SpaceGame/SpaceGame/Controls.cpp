@@ -30,6 +30,11 @@ IND_Key Controls::getQuickLoad()
 	return keyMap["quickLoad"];
 }
 
+IND_Key Controls::getMenu()
+{
+	return keyMap["menu"];
+}
+
 void Controls::loadSettings()
 {
 	// key - action(advance, rotate, save etc) as char

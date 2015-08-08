@@ -8,3 +8,4 @@
 
 [quickLoad]:2
 [shoot]:space
+[menu]:backquote

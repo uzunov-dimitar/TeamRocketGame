@@ -138,7 +138,7 @@
 	IND_CARET,
 	//! underscore
 	IND_UNDERSCORE,
-	//! back quote
+	//! backquote
 	IND_BACKQUOTE,
 	//! Delete
 	IND_DELETE,

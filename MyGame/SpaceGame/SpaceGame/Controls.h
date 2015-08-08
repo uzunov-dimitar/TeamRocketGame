@@ -17,6 +17,7 @@ public:
 	IND_Key getShoot();
 	IND_Key getQuickSave();
 	IND_Key getQuickLoad();
+	IND_Key getMenu();
 
 	void loadSettings();
 
