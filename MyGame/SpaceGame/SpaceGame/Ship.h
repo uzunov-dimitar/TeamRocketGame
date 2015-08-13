@@ -30,7 +30,10 @@ private:
 
 	vector<Bullet*> mBullets;
 public:
-	Ship(int health = 100, int numFiredBullets = 0, int score = 0, float acceleration = 100.0f, float jolt = 50.0f, float maxSpeed = 400.0f);
+	Ship(int health = 100, int numFiredBullets = 0, int score = 0, float acceleration = 0.0f, float jolt = 50.0f, float maxSpeed = 800.0f);
+
+	// @overwrite
+	virtual float getAngleZRadian() const;
 
 	int getHealth() const;
 	void setHealth(int);
@@ -71,6 +74,8 @@ public:
 	vector<Bullet*>& getBullets();
 	void setBullets(vector<Bullet*>);
 
+	// Reseting the animation, also resets the properties of Anim2d
+	// Use this function to load them from the object entity that holds the surface which never changes
 	void loadPropsAnim2d();
 
 	void createShip(CIndieLib* const, const char*, const float, const float);

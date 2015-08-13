@@ -6,6 +6,9 @@
 class Bullet : public Object {
 private:
 public:
+	// @overwrite
+	virtual float getAngleZRadian() const;
+
 	void createBullet(CIndieLib* const, const char*, float, float, float);
 	bool updateBullet(float);
 };

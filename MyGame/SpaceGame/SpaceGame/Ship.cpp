@@ -4,6 +4,11 @@ Ship::Ship(int health, int numFiredBullets, int score, float acceleration, float
 {
 }
 
+float Ship::getAngleZRadian() const
+{
+	return (-getAngleZ() + 90.0f) / 180.0f * M_PI;
+}
+
 int Ship::getHealth() const
 {
 	return health;;
@@ -220,6 +225,7 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 	getEntity2d()->setHotSpot(0.5f, 0.5f); // comment out to see both entity2d and mAnim2dShip
 	getEntity2d()->setPosition(0, 0, 1);
 	setPosition(posX, posY);
+	getEntity2d()->setBoundingAreas("resources/Spaceship with motor new/spaceship_collisions.xml");
 
 	getAnim2dShip()->setAnimation(getAnimationStill());
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
@@ -241,6 +247,9 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 	setScale(scale, scale);
 	getAnim2dShip()->setScale(scale, scale);
 
+	// set angular properties
+	setAngularAcceleration(500.0f);
+	setMaxAngularSpeed(270.0f);
 }
 
 void Ship::updateShip(Controls* controls, float mDelta)
@@ -282,19 +291,39 @@ void Ship::updateShip(Controls* controls, float mDelta)
 			getRocketSound()->setIsPaused(false);
 		}
 
-		
-
-		setPosX(getPosX() + getSpeed() * cos(getAngleZRadian()) * mDelta);
-		setPosY(getPosY() - getSpeed() * sin(getAngleZRadian()) * mDelta);
+		setPosX(getPosX() + getSpeedX() * mDelta);
+		setPosY(getPosY() + getSpeedY() * mDelta);
 		this->checkCoords();
 
-		setAcceleration(getAcceleration() + ((getSpeed() + getAcceleration()*mDelta) < getMaxSpeed() ?
-																									getJolt()*mDelta :
-																									0));
+		setAcceleration(getAcceleration() + ((getAcceleration() + getJolt()*mDelta) < 5 * getJolt() ?
+			getJolt()*mDelta :
+			0));
 
-		setSpeed(getSpeed() + ((getSpeed() + getAcceleration()*mDelta) < getMaxSpeed() ?
-																						getAcceleration()*mDelta :
-																						0));
+		if (fabs(getSpeedX() + getAcceleration() * mDelta* cos(getAngleZRadian())) < (fabs(getMaxSpeed() * cos(getAngleZRadian()))))
+		{
+			setSpeedX(getSpeedX() + getAcceleration() * mDelta* cos(getAngleZRadian()));
+		}
+		if (fabs(getSpeedY() - getAcceleration() * mDelta* sin(getAngleZRadian())) < (fabs(getMaxSpeed() * sin(getAngleZRadian()))))
+		{
+			setSpeedY(getSpeedY() - getAcceleration() * mDelta* sin(getAngleZRadian()));
+		}
+
+		if (fabs(getSpeedX()) > fabs(getMaxSpeed() * cos(getAngleZRadian())) || fabs(getSpeedY()) > fabs(getMaxSpeed() * sin(getAngleZRadian())))
+		{
+			float largestSpeed = (getSpeedX() > getSpeedY() ? getSpeedX() : getSpeedY());
+			// Note: Always using getJolt() instead of relying on getAcceleration() makes the movement more drunkish
+			if (fabs(largestSpeed) > fabs((getAcceleration() > 0.0f ? getAcceleration() : getJolt()) * mDelta)) 
+			{
+				float percent = (largestSpeed - 1.0f * (largestSpeed > 0.0f ? 1.0f : -1.0f) * (getAcceleration() > 0.0f ? getAcceleration() : getJolt()) * mDelta) / largestSpeed;
+				setSpeedX(getSpeedX() * percent);
+				setSpeedY(getSpeedY() * percent);
+			}
+			else
+			{
+				setSpeedX(0.0f);
+				setSpeedY(0.0f);
+			}
+		}
 	}
 	else
 	{
@@ -303,18 +332,33 @@ void Ship::updateShip(Controls* controls, float mDelta)
 		getRocketSound()->setIsPaused(true);
 		// Deaccelerate
 
-		setAcceleration(getAcceleration() - (getAcceleration() > 0 ?
-																		getJolt()*mDelta :
-																		0));
+		setPosX(getPosX() + getSpeedX() * mDelta);
+		setPosY(getPosY() + getSpeedY() * mDelta);
+		this->checkCoords();
 
-		setSpeed(getSpeed() - ((getSpeed() - getAcceleration()*mDelta) > 0 ?
-																			getAcceleration()*mDelta :
-																			0));
+		setAcceleration(getAcceleration() - ((getAcceleration() - getJolt()*mDelta) > 0.0f ?
+			getJolt()*mDelta :
+			getAcceleration()));
+
+		if (fabs(getSpeedX()) > 0.0f || fabs(getSpeedY()) > 0.0f)
+		{
+			float largestSpeed = (getSpeedX() > getSpeedY() ? getSpeedX() : getSpeedY());
+			if (fabs(largestSpeed) > fabs((getAcceleration() > 0.0f ? getAcceleration() : getJolt()) * mDelta))
+			{
+				float percent = (largestSpeed - 1.0f * (largestSpeed > 0.0f ? 1.0f : -1.0f) * (getAcceleration() > 0.0f ? getAcceleration() : getJolt()) * mDelta) / largestSpeed;
+				setSpeedX(getSpeedX() * percent);
+				setSpeedY(getSpeedY() * percent);
+			}
+			else
+			{
+				setSpeedX(0.0f);
+				setSpeedY(0.0f);
+			}
+		}
 	}
 	
 	// In case Both the Up and either Left or Right keys are pressed, the later should overwrite the standard animation
 	// Also perform the actual rotation on the ship
-
 	if (getMI()->_input->isKeyPressed(controls->getRotateLeft()) || getMI()->_input->isKeyPressed(controls->getRotateRight()))
 	{
 		// Set Animation
@@ -331,10 +375,30 @@ void Ship::updateShip(Controls* controls, float mDelta)
 			getAnim2dShip()->setSequence(0);
 		}
 
-		// Rotate with 180 degrees per second
+		// Change Angular Speed
+		setAngularSpeed(getAngularSpeed() + (getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? -1 : 1) * getAngularAcceleration() * mDelta);
 
-		setAngleZ(getAngleZ() + (getMI()->_input->isKeyPressed(controls->getRotateLeft()) ? -1 : 1) * 180 * mDelta);
+		if(fabs(getAngularSpeed()) > getMaxAngularSpeed())
+		{
+			setAngularSpeed(getMaxAngularSpeed()*(getAngularSpeed() > 0.0f ? 1 : -1));
+		}
+		setAngleZ(getAngleZ() + getAngularSpeed() * mDelta);
 	}
+	else
+	{
+		if (getAngularSpeed() != 0.0f && fabs(getAngularSpeed()) > 2.0f * getAngularAcceleration() * mDelta)
+		{
+			setAngularSpeed(getAngularSpeed() - 2.0f * (getAngularSpeed() > 0.0f ? 1.0f : -1.0f) * getAngularAcceleration() * mDelta);
+			setAngleZ(getAngleZ() + getAngularSpeed() * mDelta);
+		}
+		else
+		{
+			setAngularSpeed(0.0f);
+		}
+	}
+
+	// load back the properties into mAnim2dShip
+	this->loadPropsAnim2d();
 
 	// Manage Bullets:
 	for (vector<Bullet*>::iterator it = getBullets().begin(); it < getBullets().end(); ++it)
@@ -346,8 +410,6 @@ void Ship::updateShip(Controls* controls, float mDelta)
 				getBullets().erase(it);
 			}
 	}
-	// load back the properties into mAnim2dShip
-	this->loadPropsAnim2d();
 }
 
 Ship::~Ship()

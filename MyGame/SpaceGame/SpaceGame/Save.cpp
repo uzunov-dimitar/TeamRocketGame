@@ -66,7 +66,12 @@ void Save::writeObject(string name, Object* mObject)
 	writeLine(name + "-posY", to_string(mObject->getPosY()));
 	writeLine(name + "-scaleX", to_string(mObject->getScaleX()));
 	writeLine(name + "-scaleY", to_string(mObject->getScaleY()));
+	writeLine(name + "-speedX", to_string(mObject->getSpeedX()));
+	writeLine(name + "-speedY", to_string(mObject->getSpeedY()));
 	writeLine(name + "-angleZ", to_string(mObject->getAngleZ()));
+	writeLine(name + "-angularSpeed", to_string(mObject->getAngularSpeed()));
+	writeLine(name + "-angularAcceleration", to_string(mObject->getAngularAcceleration()));
+	writeLine(name + "-maxAngularSpeed", to_string(mObject->getMaxAngularSpeed()));
 }
 
 void Save::writePlanet(Planet* mPlanet, int i)
@@ -194,6 +199,31 @@ bool Save::readObject(Object* mObject, string& property, string& value)
 		mObject->setScaleY(stof(value));
 		return true;
 	}
+	if (!property.compare("speedX"))
+	{
+		mObject->setSpeedX(stof(value));
+		return true;
+	}
+	if (!property.compare("speedY"))
+	{
+		mObject->setSpeedY(stof(value));
+		return true;
+	}
+	if (!property.compare("angularSpeed"))
+	{
+		mObject->setAngularSpeed(stof(value));
+		return true;
+	}
+	if (!property.compare("angularAcceleration"))
+	{
+		mObject->setAngularAcceleration(stof(value));
+		return true;
+	}
+	if (!property.compare("maxAngularSpeed"))
+	{
+		mObject->setMaxAngularSpeed(stof(value));
+		return true;
+	}
 	if (!property.compare("angleZ"))
 	{
 		mObject->setAngleZ(stof(value));
@@ -213,6 +243,7 @@ void Save::readPlanet(Planet* mPlanet, string& property, string& value)
 {
 	if (!readObject(mPlanet, property, value))
 	{
+		mPlanet->getEntity2d()->setBoundingCircle("planet", mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f);
 		if (!property.compare("circleTrajectory"))
 		{
 			mPlanet->setCircleTrajectory(stoi(value));
@@ -289,7 +320,10 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 			mShip->getAnim2dShip()->setAnimation(mShip->getAnimationStill());
 			mShip->loadPropsAnim2d();
 
+			// manage the 2d entity
 			mShip->getEntity2d()->setPosition(mShip->getPosX(), mShip->getPosY(), 1);
+			// set bounding areas
+			mShip->getEntity2d()->setBoundingAreas("resources/Spaceship with motor new/spaceship_collisions.xml");
 
 			// Manage Sound
 			mShip->setSoundEngine(irrklang::createIrrKlangDevice());

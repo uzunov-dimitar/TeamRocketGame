@@ -12,7 +12,15 @@ class Object : public ErrorHandler {
 private:
 	float posX, posY;
 	float scaleX, scaleY;
+	float speedX, speedY; // add to save!
+
+	// In Degrees!
+	// NOTE: in indielib clockwise movement is considered positive and not negative!
 	float angleZ;
+	float angularSpeed; // add to save
+	float angularAcceleration; // add to save
+	float maxAngularSpeed; //add to save
+
 	char* pathSurface;
 	CIndieLib* mI;
 	IND_Surface* mSurface;
@@ -35,9 +43,21 @@ public:
 	float getWidth() const;
 	float getHeight() const;
 
+	float getSpeedX() const;
+	void setSpeedX(float);
+	float getSpeedY() const;
+	void setSpeedY(float);
+	float getSpeedXY() const;
+
 	float getAngleZ() const;
 	void setAngleZ(float);
-	float getAngleZRadian() const;
+	virtual float getAngleZRadian() const;
+	float getAngularSpeed() const;
+	void setAngularSpeed(float);
+	float getAngularAcceleration() const;
+	void setAngularAcceleration(float);
+	float getMaxAngularSpeed() const;
+	void setMaxAngularSpeed(float);
 
 	char* getPathSurface() const;
 	void setPathSurface(const char*);

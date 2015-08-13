@@ -1,5 +1,10 @@
 #include "Bullet.h"
 
+float Bullet::getAngleZRadian() const
+{
+	return (-getAngleZ() + 90.0f) / 180.0f * M_PI;
+}
+
 void Bullet::createBullet(CIndieLib*const mI, const char* path, float posX, float posY, float angleZ)
 {
 	setMI(mI);

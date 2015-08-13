@@ -48,6 +48,7 @@ void Planet::createPlanet(CIndieLib * const mI, const char * path, const float p
 
 	setPosition(posX, posY);
 	setAngleZ(angleZRadian / M_PI * 180);
+	getEntity2d()->setBoundingCircle("planet", getSurface()->getWidth()/2.0f, getSurface()->getWidth() / 2.0f, getSurface()->getWidth() / 2.0f);
 
 	// Set Scale
 	int winWidth = getMI()->_window->getWidth();
@@ -90,6 +91,8 @@ void Planet::updatePlanet(float mDelta)
 	// move at 45 degrees per second
 	setAngleZ(getAngleZ() - (45 * mDelta));
 
+	float oldPosX = getPosX();
+	float oldPosY = getPosY();
 	if (isCircletrajectory())
 	{
 		moveInCircle();
@@ -102,6 +105,8 @@ void Planet::updatePlanet(float mDelta)
 	{
 		(*it)->updateSatellite(getPosX(), getPosY(), mDelta);
 	}
+	setSpeedX((getPosX() - oldPosX) / mDelta);
+	setSpeedY((getPosY() - oldPosY) / mDelta);
 }
 
 void Planet::moveInCircle()

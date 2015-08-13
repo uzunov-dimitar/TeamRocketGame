@@ -1,6 +1,6 @@
 #include "Object.h"
 
-Object::Object() : posX(0.0f), posY(0.0f), scaleX(0.0f), scaleY(0.0f), angleZ(0.0f), pathSurface(new char[100]), mSurface(IND_Surface::newSurface()), mEntity2d(IND_Entity2d::newEntity2d())
+Object::Object() : posX(0.0f), posY(0.0f), scaleX(0.0f), scaleY(0.0f), speedX(0.0f), speedY(0.0f), angleZ(0.0f), angularSpeed(0.0f), angularAcceleration(0.0f), maxAngularSpeed(0.0f), pathSurface(new char[100]), mSurface(IND_Surface::newSurface()), mEntity2d(IND_Entity2d::newEntity2d())
 {
 }
 
@@ -70,6 +70,31 @@ float Object::getHeight() const
 	return getSurface()->getHeight()*getScaleY();
 }
 
+float Object::getSpeedX() const
+{
+	return speedX;
+}
+
+void Object::setSpeedX(float speedX)
+{
+	this->speedX = speedX;
+}
+
+float Object::getSpeedY() const
+{
+	return speedY;
+}
+
+void Object::setSpeedY(float speedY)
+{
+	this->speedY = speedY;
+}
+
+float Object::getSpeedXY() const
+{
+	return sqrt(getSpeedX() * getSpeedX() + getSpeedY() * getSpeedY());
+}
+
 float Object::getAngleZ() const
 {
 	return angleZ;
@@ -77,6 +102,16 @@ float Object::getAngleZ() const
 
 void Object::setAngleZ(float angleZ)
 {
+	if (angleZ > 360.0f)
+	{
+		setAngleZ(angleZ - 360.0f);
+		return;
+	}
+	if (angleZ < 0.0f)
+	{
+		setAngleZ(angleZ + 360.0f);
+		return;
+	}
 	this->angleZ = angleZ;
 	getEntity2d()->setAngleXYZ(0, 0, angleZ);
 }
@@ -86,9 +121,38 @@ float Object::getAngleZRadian() const
 	// indielib interprets moving clockwise in a positive degree and anticlockwise as a negative degree 
 	// in math (including the implementation of sin and cos in c++) it is the opposite
 	// that's why take the opposite of the degree 
-	// and then add 90 degrees to it since the rocket faces +90 degrees by default
 	// then convert to radians
-	return (-getAngleZ() + 90) / 180.0f * M_PI;
+	return (-getAngleZ()) / 180.0f * M_PI;
+}
+
+float Object::getAngularSpeed() const
+{
+	return angularSpeed;
+}
+
+void Object::setAngularSpeed(float angularSpeed)
+{
+	this->angularSpeed = angularSpeed;
+}
+
+float Object::getAngularAcceleration() const
+{
+	return angularAcceleration;
+}
+
+void Object::setAngularAcceleration(float angularAcceleration)
+{
+	this->angularAcceleration = angularAcceleration;
+}
+
+float Object::getMaxAngularSpeed() const
+{
+	return maxAngularSpeed;
+}
+
+void Object::setMaxAngularSpeed(float maxAngularSpeed)
+{
+	this->maxAngularSpeed = maxAngularSpeed;
 }
 
 char * Object::getPathSurface() const

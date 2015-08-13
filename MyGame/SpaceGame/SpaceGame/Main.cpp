@@ -5,7 +5,6 @@
 #include "IND_Animation.h"
 #include "IND_Font.h"
 #include "IND_Entity2d.h"
-#include "IND_Light.h"
 #include "irrKlang.h"
 #include "Controls.h"
 #include "Hud.h"
@@ -20,6 +19,7 @@ Main
 ==================
 */
 
+void checkCollisions(CIndieLib* const, vector<Planet*>, Ship*);
 int IndieLib()
 {
 	// ----- IndieLib intialization -----
@@ -66,6 +66,7 @@ int IndieLib()
 
 	bool loadSave = false;
 	float mDelta = 0.0f;
+	//mI->_entity2dManager->
 	while (!mI->_input->onKeyPress(IND_ESCAPE) && !mI->_input->quit() && !mMenu->isExit())
 	{
 		// get delta time
@@ -105,6 +106,7 @@ int IndieLib()
 			}
 			else
 			{
+				checkCollisions(mI, mPlanets, mShip);
 				mShip->updateShip(controls, mDelta);
 				for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
 				{
@@ -130,4 +132,29 @@ int IndieLib()
 	deleteObjects(mHud, mShip, mPlanets);
 	mI->end();
 	return 0;
+}
+
+void checkCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
+{
+	for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
+	{
+		if (mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_vertice")
+		    || mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_body"))
+		{
+			mShip->setSpeedX((*it)->getSpeedX() * 1.5f);
+			mShip->setSpeedY((*it)->getSpeedY() * 1.5f);
+			if (mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_vertice"))
+			{
+				// Note: Y-axis is inverted, i.e. moving up is a negative movement
+				if ((cos(mShip->getAngleZRadian()) > 0 && (*it)->getSpeedY() > 0) || (cos(mShip->getAngleZRadian()) < 0 && (*it)->getSpeedY() < 0))
+				{
+					mShip->setAngularSpeed(300.0f);
+				}
+				else
+				{
+					mShip->setAngularSpeed(-300.0f);
+				}
+			}
+		}
+	}
 }

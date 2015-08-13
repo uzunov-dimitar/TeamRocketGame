@@ -285,7 +285,7 @@ void startNewGame(CIndieLib* const mI, Hud* mHud, vector<Planet*>& mPlanets, Shi
 	}
 
 	mShip = new Ship(100, 0, 0, 0, winWidth / 20.0f, winWidth / 3.0f);
-	mShip->createShip(mI, "resources/Spaceship with motor new/1.png", winWidth / 2, winHeight / 2);
+	mShip->createShip(mI, "resources/Spaceship with motor new/1.png", winWidth / 2.0f, winHeight / 2.0f);
 
 	mHud->showHud();
 	mHud->getLoadingText()->setShow(false);
@@ -293,6 +293,7 @@ void startNewGame(CIndieLib* const mI, Hud* mHud, vector<Planet*>& mPlanets, Shi
 
 void  deleteObjects(Hud* mHud, Ship*& mShip, vector<Planet*>& mPlanets)
 {
+	// Adjust the hud
 	mHud->hideHud();
 	mHud->getLoadingText()->setShow(true);
 	// check if mShip actually points to an object
