@@ -2,6 +2,7 @@
 #define SHIP_H
 
 #include "irrKlang.h"
+#include "IND_Timer.h"
 #include "Object.h"
 #include "Bullet.h"
 #include "Controls.h"
@@ -12,6 +13,8 @@ private:
 	int health;
 	int numFiredBullets;
 	int score;
+	short lastHitPlanet; // add to save
+
 	float speed;
 	float acceleration;
 	float jolt;
@@ -21,7 +24,10 @@ private:
 	IND_Animation* mAnimationShip;
 	IND_Animation* mAnimationLeft;
 	IND_Animation* mAnimationRight;
+	IND_Animation* mAnimationExplode; //add to save
 	IND_Entity2d* mAnim2dShip;
+
+	IND_Timer* timer;
 
 	irrklang::ISoundEngine* soundEngine;
 	irrklang::ISound* rocketSound;
@@ -30,7 +36,7 @@ private:
 
 	vector<Bullet*> mBullets;
 public:
-	Ship(int health = 100, int numFiredBullets = 0, int score = 0, float acceleration = 0.0f, float jolt = 50.0f, float maxSpeed = 800.0f);
+	Ship(int health = 100, int numFiredBullets = 0, int score = 0, float acceleration = 0.0f, float jolt = 50.0f, float maxSpeed = 2000.0f);
 
 	// @overwrite
 	virtual float getAngleZRadian() const;
@@ -41,6 +47,8 @@ public:
 	void setNumFiredBullets(int);
 	int getScore()const;
 	void setScore(int);
+	short getLastHitPlanet() const;
+	void setLastHitPlanet(short);
 
 	float getSpeed() const;
 	void setSpeed(float);
@@ -59,8 +67,14 @@ public:
 	void setAnimationLeft(IND_Animation*);
 	IND_Animation* getAnimationRight() const;
 	void setAnimationRight(IND_Animation*);
+	IND_Animation* getAnimationExplode() const;
+	void setAnimationExplode(IND_Animation*);
+
 	IND_Entity2d* getAnim2dShip() const;
 	void setAnim2dShip(IND_Entity2d*);
+
+	IND_Timer* getTimer() const;
+	void setTimer(IND_Timer*);
 
 	irrklang::ISoundEngine* getSoundEngine() const;
 	void setSoundEngine(irrklang::ISoundEngine*);

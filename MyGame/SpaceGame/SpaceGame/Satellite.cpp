@@ -28,6 +28,7 @@ void Satellite::createSatellite(CIndieLib * const mI, const char * path, const f
 
 	setAngleZ(angleZ);
 	setOrbitRadius(orbitRadius);
+	getEntity2d()->setBoundingCircle("satellite", getSurface()->getWidth() / 2.0f, getSurface()->getWidth() / 2.0f, getSurface()->getWidth() / 2.0f);
 
 	setPosX(posX + cos(getAngleZRadian())*getOrbitRadius());
 	setPosY(posY + cos(getAngleZRadian())*getOrbitRadius());

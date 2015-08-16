@@ -95,18 +95,25 @@ void Save::writeSatellite(string name, Satellite* mSatellite)
 
 void Save::writeShip(Ship* mShip)
 {
+	// write general object properties
 	writeObject("ship", mShip);
+
+	// specific properties
 	writeLine("ship-health", to_string(mShip->getHealth()));
 	writeLine("ship-numFiredBullets", to_string(mShip->getNumFiredBullets()));
 	writeLine("ship-score", to_string(mShip->getScore()));
+	writeLine("ship-lastHitPlanet", to_string(mShip->getLastHitPlanet()));
+
 	writeLine("ship-speed", to_string(mShip->getSpeed()));
 	writeLine("ship-acceleration", to_string(mShip->getAcceleration()));
 	writeLine("ship-jolt", to_string(mShip->getJolt()));
 	writeLine("ship-maxSpeed", to_string(mShip->getMaxSpeed()));
+
 	writeLine("ship-mAnimationStill", mShip->getAnimationStill()->getName());
 	writeLine("ship-mAnimationShip", mShip->getAnimationShip()->getName());
 	writeLine("ship-mAnimationLeft", mShip->getAnimationLeft()->getName());
 	writeLine("ship-mAnimationRight", mShip->getAnimationRight()->getName());
+	writeLine("ship-mAnimationExplode", mShip->getAnimationExplode()->getName());
 	int i = 0;
 	for (vector<Bullet*>::iterator it = mShip->getBullets().begin(); it != mShip->getBullets().end(); ++it)
 	{
@@ -156,6 +163,7 @@ bool Save::readLine(Ship* mShip, vector<Planet*>& mPlanets)
 			{
 				mShip->getBullets().push_back(new Bullet());
 				mShip->getBullets().back()->setMI(getMI());
+				mShip->getBullets().back()->getEntity2d()->setBoundingAreas("resources/green_beam_collisions.xml");
 			}
 			readBullet(mShip->getBullets().back(), property, value);
 		}
@@ -243,7 +251,7 @@ void Save::readPlanet(Planet* mPlanet, string& property, string& value)
 {
 	if (!readObject(mPlanet, property, value))
 	{
-		mPlanet->getEntity2d()->setBoundingCircle("planet", mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f);
+		
 		if (!property.compare("circleTrajectory"))
 		{
 			mPlanet->setCircleTrajectory(stoi(value));
@@ -251,6 +259,7 @@ void Save::readPlanet(Planet* mPlanet, string& property, string& value)
 		if (!property.compare("orbitRadius"))
 		{
 			mPlanet->setOrbitRadius(stof(value));
+			mPlanet->getEntity2d()->setBoundingCircle("planet", mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f);
 		}
 		if (!property.compare(0, 9, "satellite"))
 		{
@@ -276,6 +285,7 @@ void Save::readSatellite(Satellite* mSatellite, string& property, string& value)
 		if (!property.compare("orbitRadius"))
 		{
 			mSatellite->setOrbitRadius(stof(value));
+			mSatellite->getEntity2d()->setBoundingCircle("satellite", mSatellite->getSurface()->getWidth() / 2.0f, mSatellite->getSurface()->getWidth() / 2.0f, mSatellite->getSurface()->getWidth() / 2.0f);
 		}
 	}
 }
@@ -295,6 +305,10 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		if (!property.compare("score"))
 		{
 			mShip->setScore(stoi(value));
+		}
+		if (!property.compare("lastHitPlanet"))
+		{
+			mShip->setLastHitPlanet(stoi(value));
 		}
 		if (!property.compare("speed"))
 		{
@@ -348,6 +362,10 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		if (!property.compare("mAnimationRight"))
 		{
 			getMI()->_animationManager->addToSurface(mShip->getAnimationRight(), value.c_str(), IND_ALPHA, IND_32);
+		}
+		if (!property.compare("mAnimationExplode"))
+		{
+			getMI()->_animationManager->addToSurface(mShip->getAnimationExplode(), value.c_str(), IND_ALPHA, IND_32);
 		}
 	}
 }

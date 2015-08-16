@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bounding_areas>
+	<rectangle id="bullet" x="0" y="0" width="20" height="60" />
+</bounding_areas>

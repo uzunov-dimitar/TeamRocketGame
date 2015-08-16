@@ -1,6 +1,6 @@
 #include "Ship.h"
 
-Ship::Ship(int health, int numFiredBullets, int score, float acceleration, float jolt, float maxSpeed) : health(health), numFiredBullets(numFiredBullets), score(score), speed(0.0f), acceleration(acceleration), jolt(jolt), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d()), soundEngine(NULL)
+Ship::Ship(int health, int numFiredBullets, int score, float acceleration, float jolt, float maxSpeed) : health(health), numFiredBullets(numFiredBullets), score(score), lastHitPlanet(-1), speed(0.0f), acceleration(acceleration), jolt(jolt), maxSpeed(maxSpeed), mAnimationStill(IND_Animation::newAnimation()), mAnimationShip(IND_Animation::newAnimation()), mAnimationLeft(IND_Animation::newAnimation()), mAnimationRight(IND_Animation::newAnimation()), mAnimationExplode(IND_Animation::newAnimation()), mAnim2dShip(IND_Entity2d::newEntity2d()), timer(new IND_Timer()), soundEngine(NULL)
 {
 }
 
@@ -37,6 +37,16 @@ int Ship::getScore() const
 void Ship::setScore(int score)
 {
 	this->score = score;
+}
+
+short Ship::getLastHitPlanet() const
+{
+	return lastHitPlanet;
+}
+
+void Ship::setLastHitPlanet(short lastHitPlanet)
+{
+	this->lastHitPlanet = lastHitPlanet;
 }
 
 float Ship::getSpeed() const
@@ -119,6 +129,16 @@ void Ship::setAnimationRight(IND_Animation * mAnimationRight)
 	this->mAnimationRight = mAnimationRight;
 }
 
+IND_Animation* Ship::getAnimationExplode() const
+{
+	return mAnimationExplode;
+}
+
+void Ship::setAnimationExplode(IND_Animation* mAnimationExplode)
+{
+	this->mAnimationExplode = mAnimationExplode;
+}
+
 IND_Entity2d * Ship::getAnim2dShip() const
 {
 	return mAnim2dShip;
@@ -127,6 +147,16 @@ IND_Entity2d * Ship::getAnim2dShip() const
 void Ship::setAnim2dShip(IND_Entity2d * mAnim2dShip)
 {
 	this->mAnim2dShip = mAnim2dShip;
+}
+
+IND_Timer* Ship::getTimer() const
+{
+	return timer;
+}
+
+void Ship::setTimer(IND_Timer* timer)
+{
+	this->timer = timer;
 }
 
 irrklang::ISoundEngine * Ship::getSoundEngine() const
@@ -184,7 +214,7 @@ void Ship::setBullets(vector<Bullet*> mBullets)
 void Ship::loadPropsAnim2d()
 {
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
-	getAnim2dShip()->setPosition(getPosX(), getPosY(), 0);
+	getAnim2dShip()->setPosition(getPosX(), getPosY(), 2);
 	getAnim2dShip()->setScale(getScaleX(), getScaleY());
 	getAnim2dShip()->setAngleXYZ(0, 0, getAngleZ());
 }
@@ -217,6 +247,7 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 
 	getMI()->_animationManager->addToSurface(getAnimationRight(), "resources/Spaceship rotation smoke/RIGHT/Rotate_right.xml", IND_ALPHA, IND_32);
 
+	getMI()->_animationManager->addToSurface(getAnimationExplode(), "resources/Spaceship explode/without motor/Explode_without_motor.xml", IND_ALPHA, IND_32);
 	// Manage the 2D entities - both entity2d and mAnim2dShip
 
 	getMI()->_entity2dManager->add(getEntity2d());
@@ -418,7 +449,9 @@ Ship::~Ship()
 	getMI()->_animationManager->remove(getAnimationShip());
 	getMI()->_animationManager->remove(getAnimationLeft());
 	getMI()->_animationManager->remove(getAnimationRight());
+	getMI()->_animationManager->remove(getAnimationExplode());
 	getMI()->_entity2dManager->remove(getAnim2dShip());
+	delete getTimer();
 	getSoundEngine()->drop();
 	for (vector<Bullet*>::iterator it = getBullets().begin(); it != getBullets().end(); ++it)
 	{

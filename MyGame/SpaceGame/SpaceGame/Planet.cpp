@@ -1,6 +1,6 @@
 #include "Planet.h"
 
-Planet::Planet() : circleTrajectory(false), orbitRadius(0)
+Planet::Planet() : circleTrajectory(false), orbitRadius(0), lineX(IND_Entity2d::newEntity2d()), lineY(IND_Entity2d::newEntity2d())
 {
 }
 
@@ -22,6 +22,26 @@ float Planet::getOrbitRadius() const
 void Planet::setOrbitRadius(float orbitRadius)
 {
 	this->orbitRadius = orbitRadius;
+}
+
+IND_Entity2d* Planet::getLineX() const
+{
+	return lineX;
+}
+
+void Planet::setLineX(IND_Entity2d* lineX)
+{
+	this->lineX = lineX;
+}
+
+IND_Entity2d* Planet::getLineY() const
+{
+	return lineY;
+}
+
+void Planet::setLineY(IND_Entity2d* lineY)
+{
+	this->lineY = lineY;
 }
 
 vector<Satellite*>& Planet::getSatellites()
@@ -62,6 +82,11 @@ void Planet::createPlanet(CIndieLib * const mI, const char * path, const float p
 
 	setCircleTrajectory(circleTrajectory);
 	setOrbitRadius(orbitRadius);
+	setAngularSpeed(45.0f);
+	/*getLineX()->setPrimitive2d(IND_LINE);
+	getLineY()->setPrimitive2d(IND_LINE);
+	getMI()->_entity2dManager->add(getLineX());
+	getMI()->_entity2dManager->add(getLineY());*/
 }
 
 bool Planet::addSatellite()
@@ -88,25 +113,30 @@ bool Planet::addSatellite()
 
 void Planet::updatePlanet(float mDelta)
 {
-	// move at 45 degrees per second
-	setAngleZ(getAngleZ() - (45 * mDelta));
+	// rotate
+	setAngleZ(getAngleZ() - (getAngularSpeed() * mDelta));
 
-	float oldPosX = getPosX();
-	float oldPosY = getPosY();
 	if (isCircletrajectory())
 	{
 		moveInCircle();
+		float speed = (getAngularSpeed() * M_PI / 180.0f) * getOrbitRadius();
+		setSpeedX(-sin(getAngleZRadian()) * speed);
+		setSpeedY(-cos(getAngleZRadian()) * speed);
 	}
 	else
 	{
 		moveInEllipse();
+		float speedMajor = (getAngularSpeed() * M_PI / 180.0f) * (getOrbitRadius() / getMI()->_window->getHeight()) * getMI()->_window->getWidth();
+		float speedMinor = (getAngularSpeed() * M_PI / 180.0f) * getOrbitRadius();
+		setSpeedX(-sin(getAngleZRadian()) * speedMajor);
+		setSpeedY(-cos(getAngleZRadian()) * speedMinor);
 	}
 	for (vector<Satellite*>::iterator it = getSatellites().begin(); it != getSatellites().end(); ++it)
 	{
 		(*it)->updateSatellite(getPosX(), getPosY(), mDelta);
 	}
-	setSpeedX((getPosX() - oldPosX) / mDelta);
-	setSpeedY((getPosY() - oldPosY) / mDelta);
+	//getLineX()->setLine(getPosX(), getPosY(), getPosX() + getSpeedX(), getPosY());
+	//getLineY()->setLine(getPosX(), getPosY(), getPosX() , getPosY() + getSpeedY());
 }
 
 void Planet::moveInCircle()

@@ -68,6 +68,7 @@ void Hud::createHud(CIndieLib* const mI)
 {
 	setMI(mI);
 
+	float scale = getMI()->_window->getWidth() / 1350.0f ;
 	getMI()->_fontManager->add(getFont(), "resources/font_big.png", "resources/font_big.xml", IND_ALPHA, IND_32);
 
 	getMI()->_entity2dManager->add(getBulletsText());
@@ -84,6 +85,11 @@ void Hud::createHud(CIndieLib* const mI)
 	getHealthText()->setAlign(IND_LEFT);
 	getScoreText()->setAlign(IND_LEFT);
 	getLoadingText()->setAlign(IND_CENTER);
+
+	getBulletsText()->setScale(scale, scale);
+	getHealthText()->setScale(scale, scale);
+	getScoreText()->setScale(scale, scale);
+	getLoadingText()->setScale(scale, scale);
 
 	int winWidth = getMI()->_window->getWidth();
 	int winHeight = getMI()->_window->getHeight();

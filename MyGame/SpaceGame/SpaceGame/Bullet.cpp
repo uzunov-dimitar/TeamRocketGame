@@ -16,15 +16,19 @@ void Bullet::createBullet(CIndieLib*const mI, const char* path, float posX, floa
 	getEntity2d()->setHotSpot(0.5f, 0.5f);
 	setPosition(posX, posY);
 	setAngleZ(angleZ);
+	getEntity2d()->setBoundingAreas("resources/green_beam_collisions.xml");
 
 	float scale = (0.02*(getMI()->_window->getHeight() / getSurface()->getHeight()));
 	setScale(scale, scale);
+
+	setSpeedX(getMI()->_window->getWidth() * cos(getAngleZRadian()));
+	setSpeedY(- getMI()->_window->getWidth() * sin(getAngleZRadian()));
 }
 
 bool Bullet::updateBullet(float mDelta)
 {
-	setPosX(getPosX() + getMI()->_window->getWidth() * cos(getAngleZRadian()) * mDelta);
-	setPosY(getPosY() - getMI()->_window->getWidth() * sin(getAngleZRadian()) * mDelta);
+	setPosX(getPosX() + getSpeedX() * mDelta);
+	setPosY(getPosY() + getSpeedY() * mDelta);
 
 	return this->checkCoords();
 }

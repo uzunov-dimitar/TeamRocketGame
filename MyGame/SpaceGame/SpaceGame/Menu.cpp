@@ -119,16 +119,21 @@ void Menu::createMenu(CIndieLib* const mI)
 	getMousePointer()->setBoundingAreas("resources/cursor_collisions.xml");
 
 	// Manage Button Surfaces
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		getIdleBtnSurfaces().push_back(IND_Surface::newSurface());
 		getActiveBtnSurfaces().push_back(IND_Surface::newSurface());
 		if (i == 0)
 		{
+			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnResume_idle.png", IND_ALPHA, IND_32);
+			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnResume_active.png", IND_ALPHA, IND_32);
+		}
+		else if (i == 1)
+		{
 			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnNG_idle.png", IND_ALPHA, IND_32);
 			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnNG_active.png", IND_ALPHA, IND_32);
 		}
-		else if (i == 1)
+		else if(i == 2)
 		{
 			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnLG_idle.png", IND_ALPHA, IND_32);
 			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnLG_active.png", IND_ALPHA, IND_32);
@@ -143,7 +148,7 @@ void Menu::createMenu(CIndieLib* const mI)
 	// set the scale to 6.5% of the window height
 	setScale(0.065 * winHeight / getIdleBtnSurfaces().back()->getHeight());
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		getMenuOptions().push_back(IND_Entity2d::newEntity2d());
 		getMI()->_entity2dManager->add(getMenuOptions().back());
@@ -153,7 +158,7 @@ void Menu::createMenu(CIndieLib* const mI)
 
 		getMenuOptions().back()->setScale(getScale(), getScale());
 
-		float yOffset = (0.4f + i * 0.1f) * winHeight;
+		float yOffset = (0.35f + i * 0.1f) * winHeight; // also chage the initial offset (0.35f) in restoreProperties
 		getMenuOptions().back()->setPosition(winWidth / 2.0f, yOffset, 2);
 		getMenuOptions().back()->setBoundingRectangle(("option" + to_string(i)).c_str(), 0, 0, getIdleBtnSurfaces().at(i)->getWidth(), getIdleBtnSurfaces().at(i)->getHeight());
 		//getMenuOptions().back()->setShow(false);
@@ -180,15 +185,18 @@ void Menu::updateMenu(Hud* mHud, vector<Planet*>& mPlanets, Ship*& mShip)
 				{
 					case 0:
 						this->hide();
-						startNewGame(getMI(), mHud, mPlanets, mShip);
 					break;
 					case 1:
 						this->hide();
-						deleteObjects(mHud, mShip, mPlanets);
+						startNewGame(getMI(), mHud, mPlanets, mShip);
 					break;
 					case 2:
+						this->hide();
+						deleteObjects(mHud, mShip, mPlanets);
+						break;
+					case 3:
 						setExit(true);
-					break;
+						break;
 				}
 			}
 		}
@@ -230,7 +238,7 @@ void Menu::restoreProperties(IND_Entity2d* option, short int id)
 {
 	option->setHotSpot(0.5f, 0.5f);
 	option->setScale(getScale(), getScale());
-	option->setPosition(getMI()->_window->getWidth() / 2.0f, (0.4f + 0.1 * id) * getMI()->_window->getHeight(), 2);
+	option->setPosition(getMI()->_window->getWidth() / 2.0f, (0.35f + 0.1 * id) * getMI()->_window->getHeight(), 2);
 	option->setBoundingRectangle(("option" + to_string(id)).c_str(), 0, 0, getIdleBtnSurfaces().at(id)->getWidth(), getIdleBtnSurfaces().at(id)->getHeight());
 }
 
@@ -265,6 +273,7 @@ void startNewGame(CIndieLib* const mI, Hud* mHud, vector<Planet*>& mPlanets, Shi
 	int winWidth = mI->_window->getWidth();
 	int winHeight = mI->_window->getHeight();
 
+	// add 8 planets
 	for (int i = 0; i < 8; i++)
 	{
 		mPlanets.push_back(new Planet());
@@ -284,7 +293,7 @@ void startNewGame(CIndieLib* const mI, Hud* mHud, vector<Planet*>& mPlanets, Shi
 		while (mPlanets.back()->addSatellite());
 	}
 
-	mShip = new Ship(100, 0, 0, 0, winWidth / 20.0f, winWidth / 3.0f);
+	mShip = new Ship(100, 0, 0, 0, winWidth / 20.0f, winWidth / 1.5f);
 	mShip->createShip(mI, "resources/Spaceship with motor new/1.png", winWidth / 2.0f, winHeight / 2.0f);
 
 	mHud->showHud();

@@ -5,6 +5,7 @@
 #include "IND_Animation.h"
 #include "IND_Font.h"
 #include "IND_Entity2d.h"
+#include "IND_Timer.h"
 #include "irrKlang.h"
 #include "Controls.h"
 #include "Hud.h"
@@ -19,7 +20,7 @@ Main
 ==================
 */
 
-void checkCollisions(CIndieLib* const, vector<Planet*>, Ship*);
+void checkShipPlanetCollisions(CIndieLib* const, vector<Planet*>, Ship*);
 int IndieLib()
 {
 	// ----- IndieLib intialization -----
@@ -38,7 +39,11 @@ int IndieLib()
 
 	IND_Surface *mSurfaceBack = IND_Surface::newSurface();
 	if (!mI->_surfaceManager->add(mSurfaceBack, "resources/Backgrounds/18.jpg", IND_OPAQUE, IND_32)) return 0;
-	
+
+	/*IND_Animation* mTestA = IND_Animation::newAnimation();
+	if (!mI->_animationManager->addToSurface(mTestA, "resources/animations/dust.xml", IND_ALPHA, IND_32, 255, 0, 255)) return 0;
+	mTestA->getActualFramePos(0);*/
+
 	// Loading 2D Entities
 
 	// Background
@@ -66,12 +71,14 @@ int IndieLib()
 
 	bool loadSave = false;
 	float mDelta = 0.0f;
-	//mI->_entity2dManager->
+
+	IND_Timer* mTimer = new IND_Timer;
+	//mTimer->start();
 	while (!mI->_input->onKeyPress(IND_ESCAPE) && !mI->_input->quit() && !mMenu->isExit())
 	{
 		// get delta time
 		mDelta = mI->_render->getFrameTime() / 1000.0f;
-		
+
 		if (mI->_input->isKeyPressed(controls->getMenu()))
 		{
 			mMenu->show();
@@ -92,25 +99,28 @@ int IndieLib()
 				mHud->showHud();
 			}
 
-			mHud->updateHud(mShip);
-
-			if (mI->_input->onKeyPress(controls->getQuickSave()))
+			if (mShip != NULL)
 			{
-				quickSave->makeSave(mI, mShip, mPlanets);
-			}
-
-			if (mI->_input->onKeyPress(controls->getQuickLoad()))
-			{
-				deleteObjects(mHud, mShip, mPlanets);
-				loadSave = true;
-			}
-			else
-			{
-				checkCollisions(mI, mPlanets, mShip);
-				mShip->updateShip(controls, mDelta);
-				for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
+				if (mI->_input->onKeyPress(controls->getQuickSave()))
 				{
-					(*it)->updatePlanet(mDelta);
+					quickSave->makeSave(mI, mShip, mPlanets);
+				}
+
+				mHud->updateHud(mShip);
+
+				if (mI->_input->onKeyPress(controls->getQuickLoad()))
+				{
+					deleteObjects(mHud, mShip, mPlanets);
+					loadSave = true;
+				}
+				else
+				{
+					checkShipPlanetCollisions(mI, mPlanets, mShip);
+					mShip->updateShip(controls, mDelta);
+					for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
+					{
+						(*it)->updatePlanet(mDelta);
+					}
 				}
 			}
 		}
@@ -134,26 +144,68 @@ int IndieLib()
 	return 0;
 }
 
-void checkCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
+void checkShipPlanetCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
 {
+	float halfWidth = mI->_window->getWidth() / 2.0f;
+	float halfHeight = mI->_window->getHeight() / 2.0f;
 	for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
 	{
 		if (mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_vertice")
 		    || mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_body"))
-		{
-			mShip->setSpeedX((*it)->getSpeedX() * 1.5f);
-			mShip->setSpeedY((*it)->getSpeedY() * 1.5f);
-			if (mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_vertice"))
+		{	
+			// calculate the position of the ship relative to the planet
+			// also do some calculations to shift the center of the rocket for better accuracy
+			float posX = (mShip->getPosX() + 0.25f * mShip->getHeight() * cos(mShip->getAngleZRadian())) - (*it)->getPosX();
+			float posY = (mShip->getPosY() - 0.25f * mShip->getHeight() * sin(mShip->getAngleZRadian())) - (*it)->getPosY();
+
+			// put a minus for the inverted Y axis
+			float newPosY =  posX * sin(-(*it)->getAngleZRadian()) - posY * cos(-(*it)->getAngleZRadian());
+
+			bool result = (newPosY > 0.0f ? false : true);
+
+			if (result)
 			{
-				// Note: Y-axis is inverted, i.e. moving up is a negative movement
-				if ((cos(mShip->getAngleZRadian()) > 0 && (*it)->getSpeedY() > 0) || (cos(mShip->getAngleZRadian()) < 0 && (*it)->getSpeedY() < 0))
+				mShip->setSpeedX(-(*it)->getSpeedX() * 2.0f);
+				mShip->setSpeedY(-(*it)->getSpeedY() * 2.0f);
+			}
+			else
+			{
+				mShip->setSpeedX((*it)->getSpeedX() * 2.0f);
+				mShip->setSpeedY((*it)->getSpeedY() * 2.0f);
+				if (mI->_entity2dManager->isCollision((*it)->getEntity2d(), "planet", mShip->getEntity2d(), "ship_vertice"))
 				{
-					mShip->setAngularSpeed(300.0f);
+					// Note: Y-axis is inverted, i.e. moving up is a negative movement
+					if ((cos(mShip->getAngleZRadian()) > 0 && (*it)->getSpeedY() > 0) || (cos(mShip->getAngleZRadian()) < 0 && (*it)->getSpeedY() < 0))
+					{
+						mShip->setAngularSpeed(300.0f);
+					}
+					else
+					{
+						mShip->setAngularSpeed(-300.0f);
+					}
 				}
-				else
-				{
-					mShip->setAngularSpeed(-300.0f);
-				}
+			}
+
+			// decrease health
+			if ((mShip->getTimer()->getTicks() / 1000.f) > 1.0f || mShip->getLastHitPlanet() != (it - mPlanets.begin()))
+			{
+				mShip->setHealth(mShip->getHealth() - 10);
+				mShip->getTimer()->start();
+				mShip->setLastHitPlanet(it - mPlanets.begin());
+			}
+			
+		}
+
+		// check satellites collisions
+		for (vector<Satellite*>::iterator itSat = (*it)->getSatellites().begin(); itSat != (*it)->getSatellites().end(); ++itSat)
+		{
+			if (mI->_entity2dManager->isCollision((*itSat)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_vertice")
+				|| mI->_entity2dManager->isCollision((*itSat)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_body"))
+			{
+				mShip->setHealth(mShip->getHealth() - 5);
+				delete *itSat;
+				(*it)->getSatellites().erase(itSat);
+				--itSat;
 			}
 		}
 	}

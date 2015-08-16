@@ -11,6 +11,8 @@ private:
 	// if false, moveInEllipse
 	bool circleTrajectory;
 	float orbitRadius;
+	IND_Entity2d* lineX;
+	IND_Entity2d* lineY;
 	vector<Satellite*> mSatellites;
 public:
 	Planet();
@@ -19,6 +21,11 @@ public:
 	void setCircleTrajectory(bool);
 	float getOrbitRadius() const;
 	void setOrbitRadius(float);
+
+	IND_Entity2d* getLineX() const;
+	void setLineX(IND_Entity2d*);
+	IND_Entity2d* getLineY() const;
+	void setLineY(IND_Entity2d*);
 
 	vector<Satellite*>& getSatellites();
 	void setSatellites(vector<Satellite*>);
