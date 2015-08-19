@@ -20,7 +20,9 @@ Main
 ==================
 */
 
-void checkShipPlanetCollisions(CIndieLib* const, vector<Planet*>, Ship*);
+void checkShipPlanetsCollisions(CIndieLib* const, vector<Planet*>, Ship*);
+void checkBulletsPlanetsCollisions(CIndieLib* const, vector<Planet*>, vector<Bullet*>&);
+
 int IndieLib()
 {
 	// ----- IndieLib intialization -----
@@ -38,7 +40,7 @@ int IndieLib()
 	// ----- Surface loading -----
 
 	IND_Surface *mSurfaceBack = IND_Surface::newSurface();
-	if (!mI->_surfaceManager->add(mSurfaceBack, "resources/Backgrounds/18.jpg", IND_OPAQUE, IND_32)) return 0;
+	if (!mI->_surfaceManager->add(mSurfaceBack, "../SpaceGame/resources/Backgrounds/18.jpg", IND_OPAQUE, IND_32)) return 0;
 
 	/*IND_Animation* mTestA = IND_Animation::newAnimation();
 	if (!mI->_animationManager->addToSurface(mTestA, "resources/animations/dust.xml", IND_ALPHA, IND_32, 255, 0, 255)) return 0;
@@ -73,7 +75,6 @@ int IndieLib()
 	float mDelta = 0.0f;
 
 	IND_Timer* mTimer = new IND_Timer;
-	//mTimer->start();
 	while (!mI->_input->onKeyPress(IND_ESCAPE) && !mI->_input->quit() && !mMenu->isExit())
 	{
 		// get delta time
@@ -82,10 +83,11 @@ int IndieLib()
 		if (mI->_input->isKeyPressed(controls->getMenu()))
 		{
 			mMenu->show();
+			//mShip->getSoundEngine()->setAllSoundsPaused(true);
 		}
 		if (!mMenu->isHidden())
 		{
-			mMenu->updateMenu(mHud, mPlanets, mShip);
+			mMenu->updateMenu(mHud, quickSave, mPlanets, mShip);
 			loadSave = mHud->getLoadingText()->isShow();
 		}
 		else
@@ -115,7 +117,11 @@ int IndieLib()
 				}
 				else
 				{
-					checkShipPlanetCollisions(mI, mPlanets, mShip);
+					//----- Collisions -----
+					checkShipPlanetsCollisions(mI, mPlanets, mShip);
+					checkBulletsPlanetsCollisions(mI, mPlanets, mShip->getBullets());
+
+					//----- Movement update -----
 					mShip->updateShip(controls, mDelta);
 					for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
 					{
@@ -144,7 +150,7 @@ int IndieLib()
 	return 0;
 }
 
-void checkShipPlanetCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
+void checkShipPlanetsCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
 {
 	float halfWidth = mI->_window->getWidth() / 2.0f;
 	float halfHeight = mI->_window->getHeight() / 2.0f;
@@ -177,11 +183,11 @@ void checkShipPlanetCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Sh
 					// Note: Y-axis is inverted, i.e. moving up is a negative movement
 					if ((cos(mShip->getAngleZRadian()) > 0 && (*it)->getSpeedY() > 0) || (cos(mShip->getAngleZRadian()) < 0 && (*it)->getSpeedY() < 0))
 					{
-						mShip->setAngularSpeed(300.0f);
+						mShip->setAngularSpeed(360.0f);
 					}
 					else
 					{
-						mShip->setAngularSpeed(-300.0f);
+						mShip->setAngularSpeed(-360.0f);
 					}
 				}
 			}
@@ -203,10 +209,29 @@ void checkShipPlanetCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Sh
 				|| mI->_entity2dManager->isCollision((*itSat)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_body"))
 			{
 				mShip->setHealth(mShip->getHealth() - 5);
-				delete *itSat;
-				(*it)->getSatellites().erase(itSat);
-				--itSat;
+				mShip->setScore(mShip->getScore() + 10);
+				mShip->getExplodeSound()->drop();
+				mShip->setExplodeSound(mShip->getSoundEngine()->play2D(mShip->getExplodeSoundSource(), false, false, true));
+				(*itSat)->destroy();
 			}
+		}
+	}
+}
+
+void checkBulletsPlanetsCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, vector<Bullet*>& shotBullets)
+{
+
+	for (vector<Planet*>::iterator itPlanet = mPlanets.begin(); itPlanet != mPlanets.end(); ++itPlanet)
+	{
+		for (vector<Bullet*>::iterator itBullet = shotBullets.begin(); itBullet != shotBullets.end(); ++itBullet)
+		{
+			if (mI->_entity2dManager->isCollision((*itPlanet)->getEntity2d(), "planet", (*itBullet)->getEntity2d(), "bullet"))
+			{
+				delete *itBullet;
+				shotBullets.erase(itBullet);
+				--itBullet;
+			}
+			//for ()
 		}
 	}
 }

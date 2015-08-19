@@ -97,11 +97,11 @@ bool Planet::addSatellite()
 		float orbitSatellite = (getWidth() + 0.065f * getMI()->_window->getHeight()) / 2.0f;
 		if (getSatellites().size() == 1)
 		{
-			getSatellites().back()->createSatellite(getMI(), ("resources/Planets/" + to_string(rand()%8+1) + ".png").c_str(), getPosX(), getPosY(), getAngleZ(), orbitSatellite);
+			getSatellites().back()->createSatellite(getMI(), ("../SpaceGame/resources/Planets/" + to_string(rand()%8+1) + ".png").c_str(), getPosX(), getPosY(), getAngleZ(), orbitSatellite);
 		}
 		else
 		{
-			getSatellites().back()->createSatellite(getMI(), ("resources/Planets/" + to_string(rand() % 8 + 1) + ".png").c_str(), getPosX(), getPosY(), getSatellites().at(0)->getAngleZ()+31 + rand()%300, orbitSatellite);
+			getSatellites().back()->createSatellite(getMI(), ("../SpaceGame/resources/Planets/" + to_string(rand() % 8 + 1) + ".png").c_str(), getPosX(), getPosY(), getSatellites().at(0)->getAngleZ()+31 + rand()%300, orbitSatellite);
 		}
 		return true;
 	}
@@ -133,7 +133,16 @@ void Planet::updatePlanet(float mDelta)
 	}
 	for (vector<Satellite*>::iterator it = getSatellites().begin(); it != getSatellites().end(); ++it)
 	{
-		(*it)->updateSatellite(getPosX(), getPosY(), mDelta);
+		if ((*it)->destroyed())
+		{
+			delete *it;
+			getSatellites().erase(it);
+			--it;
+		}
+		else
+		{
+			(*it)->updateSatellite(getPosX(), getPosY(), mDelta);
+		}
 	}
 	//getLineX()->setLine(getPosX(), getPosY(), getPosX() + getSpeedX(), getPosY());
 	//getLineY()->setLine(getPosX(), getPosY(), getPosX() , getPosY() + getSpeedY());

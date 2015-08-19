@@ -41,7 +41,7 @@ void ErrorHandler::initialize(CIndieLib * mI)
 	{
 		mi = mI;
 
-		mI->_fontManager->add(getFont(), "resources/font_small.png", "resources/font_small.xml", IND_ALPHA, IND_32);
+		mI->_fontManager->add(getFont(), "../SpaceGame/resources/font_small.png", "../SpaceGame/resources/font_small.xml", IND_ALPHA, IND_32);
 
 		mI->_entity2dManager->add(getText2d());
 

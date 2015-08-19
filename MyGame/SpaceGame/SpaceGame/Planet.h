@@ -11,8 +11,10 @@ private:
 	// if false, moveInEllipse
 	bool circleTrajectory;
 	float orbitRadius;
+
 	IND_Entity2d* lineX;
 	IND_Entity2d* lineY;
+
 	vector<Satellite*> mSatellites;
 public:
 	Planet();

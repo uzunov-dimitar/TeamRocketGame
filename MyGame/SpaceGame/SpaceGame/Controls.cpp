@@ -42,8 +42,8 @@ void Controls::loadSettings()
 	map<const char*,const char*> stringKeys;
 
 	ifstream indKeys, customKeys;
-	indKeys.open("Settings/IndieLib_Keys.txt", ios::in);
-	customKeys.open("Settings/Custom_Keys.txt", ios::in);
+	indKeys.open("../SpaceGame/Settings/IndieLib_Keys.txt", ios::in);
+	customKeys.open("../SpaceGame/Settings/Custom_Keys.txt", ios::in);
 
 	// read the custom keys and fill in stringKeys with keys and values, and keyMap only with heys
 	if (indKeys.is_open() && customKeys.is_open())

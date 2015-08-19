@@ -9,6 +9,7 @@
 #include "Planet.h"
 #include "Ship.h"
 #include "Hud.h"
+#include "Save.h"
 
 // utility functions
 void startNewGame(CIndieLib* const, Hud*, vector<Planet*>&, Ship*&);
@@ -65,7 +66,7 @@ public:
 	// main functions
 	void createMenu(CIndieLib* const);
 
-	void updateMenu(Hud*, vector<Planet*>&, Ship*&);
+	void updateMenu(Hud*, Save*, vector<Planet*>&, Ship*&);
 
 	// hide / show the menu
 	void hide();

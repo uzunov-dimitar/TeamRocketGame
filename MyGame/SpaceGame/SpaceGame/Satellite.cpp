@@ -1,6 +1,6 @@
 #include "Satellite.h"
 
-Satellite::Satellite() : orbitRadius(0)
+Satellite::Satellite() : orbitRadius(0), mAnimationDust(IND_Animation::newAnimation())
 {
 }
 
@@ -14,6 +14,17 @@ void Satellite::setOrbitRadius(float orbitRadius)
 	this->orbitRadius = orbitRadius;
 }
 
+IND_Animation* Satellite::
+getAnimationDust() const
+{
+	return mAnimationDust;
+}
+
+void Satellite::setAniamtionDust(IND_Animation* mAnimationDust)
+{
+	this->mAnimationDust = mAnimationDust;
+}
+
 void Satellite::createSatellite(CIndieLib * const mI, const char * path, const float posX, const float posY, const float angleZ, const float orbitRadius)
 {
 	// Initialize the master instance + error handler
@@ -22,9 +33,10 @@ void Satellite::createSatellite(CIndieLib * const mI, const char * path, const f
 	// Manage the surface
 	setPathSurface(path);
 
+	getMI()->_animationManager->addToSurface(getAnimationDust(), "../SpaceGame/resources/animations/dust.xml", IND_ALPHA, IND_32, 255, 0, 255);
 	// Manage the 2d entity
 	getMI()->_entity2dManager->add(getEntity2d());
-	getEntity2d()->setHotSpot(0.5f, 0.5f); // <-O
+	getEntity2d()->setHotSpot(0.5f, 0.5f);
 
 	setAngleZ(angleZ);
 	setOrbitRadius(orbitRadius);
@@ -55,4 +67,24 @@ void Satellite::moveInCircle(float posX, float posY)
 {
 	setPosX(posX + getOrbitRadius() * cos(-getAngleZRadian()));
 	setPosY(posY + getOrbitRadius() * sin(-getAngleZRadian()));
+}
+
+void Satellite::destroy()
+{
+	getEntity2d()->setAnimation(getAnimationDust());
+	getEntity2d()->setNumReplays(0);
+	getEntity2d()->setHotSpot(0.5f, 0.5f);
+	getEntity2d()->setPosition(getPosX(), getPosY(), 0);
+	setAngleZ(getAngleZ());
+	setScale(getScaleX(), getScaleY());
+}
+
+bool Satellite::destroyed()
+{
+	return (getAnimationDust()->getActualFramePos(0) == 11);
+}
+
+Satellite::~Satellite()
+{
+	getMI()->_animationManager->remove(getAnimationDust());
 }

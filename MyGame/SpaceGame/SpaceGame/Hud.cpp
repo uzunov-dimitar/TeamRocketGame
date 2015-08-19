@@ -69,7 +69,7 @@ void Hud::createHud(CIndieLib* const mI)
 	setMI(mI);
 
 	float scale = getMI()->_window->getWidth() / 1350.0f ;
-	getMI()->_fontManager->add(getFont(), "resources/font_big.png", "resources/font_big.xml", IND_ALPHA, IND_32);
+	getMI()->_fontManager->add(getFont(), "../SpaceGame/resources/font_big.png", "../SpaceGame/resources/font_big.xml", IND_ALPHA, IND_32);
 
 	getMI()->_entity2dManager->add(getBulletsText());
 	getMI()->_entity2dManager->add(getHealthText());

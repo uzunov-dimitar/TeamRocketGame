@@ -4,6 +4,7 @@ Ship::Ship(int health, int numFiredBullets, int score, float acceleration, float
 {
 }
 
+// @overwrite
 float Ship::getAngleZRadian() const
 {
 	return (-getAngleZ() + 90.0f) / 180.0f * M_PI;
@@ -201,6 +202,26 @@ void Ship::setBlasterSound(irrklang::ISound* blasterSound)
 	this->blasterSound = blasterSound;
 }
 
+irrklang::ISoundSource * Ship::getExplodeSoundSource() const
+{
+	return explodeSoundSource;
+}
+
+void Ship::setExplodeSoundSource(irrklang::ISoundSource* explodeSoundSource)
+{
+	this->explodeSoundSource = explodeSoundSource;
+}
+
+irrklang::ISound * Ship::getExplodeSound() const
+{
+	return explodeSound;
+}
+
+void Ship::setExplodeSound(irrklang::ISound* explodeSound)
+{
+	this->explodeSound = explodeSound;
+}
+
 vector<Bullet*>& Ship::getBullets()
 {
 	return mBullets;
@@ -231,23 +252,28 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 		writeError(1000, 100, "SoundEngine", "can't create device.");
 	}
 
-	setRocketSound(getSoundEngine()->play2D("irrKlang/media/v-start.wav", true, true, true));
-	setBlasterSoundSource(getSoundEngine()->addSoundSourceFromFile("irrKlang/media/blaster.wav"));
-	setBlasterSound(getSoundEngine()->play2D("irrKlang/media/blaster.wav", false, true, true));
+	setRocketSound(getSoundEngine()->play2D("../SpaceGame/irrKlang/media/v-start.wav", true, true, true));
+
+	setBlasterSoundSource(getSoundEngine()->addSoundSourceFromFile("../SpaceGame/irrKlang/media/blaster.wav"));
+	setBlasterSound(getSoundEngine()->play2D("../SpaceGame/irrKlang/media/blaster.wav", false, true, true));
+
+	setExplodeSoundSource(getSoundEngine()->addSoundSourceFromFile("../SpaceGame/irrKlang/media/explosion.wav"));
+	setExplodeSound(getSoundEngine()->play2D("../SpaceGame/irrKlang/media/explosion.wav", false, true, true));
+
 	getSoundEngine()->setSoundVolume(0.1f);
 
 	// Load Surface + Animations
 	setPathSurface(path);
 
-	getMI()->_animationManager->addToSurface(getAnimationShip(), "resources/Spaceship with motor new/Ship_advance.xml", IND_ALPHA, IND_32);
+	getMI()->_animationManager->addToSurface(getAnimationShip(), "../SpaceGame/resources/Spaceship with motor new/Ship_advance.xml", IND_ALPHA, IND_32);
 
-	getMI()->_animationManager->addToSurface(getAnimationStill(), "resources/Spaceship with motor new/Ship_still.xml", IND_ALPHA, IND_32);
+	getMI()->_animationManager->addToSurface(getAnimationStill(), "../SpaceGame/resources/Spaceship with motor new/Ship_still.xml", IND_ALPHA, IND_32);
 
-	getMI()->_animationManager->addToSurface(getAnimationLeft(), "resources/Spaceship rotation smoke/LEFT/Rotate_left.xml", IND_ALPHA, IND_32);
+	getMI()->_animationManager->addToSurface(getAnimationLeft(), "../SpaceGame/resources/Spaceship rotation smoke/LEFT/Rotate_left.xml", IND_ALPHA, IND_32);
 
-	getMI()->_animationManager->addToSurface(getAnimationRight(), "resources/Spaceship rotation smoke/RIGHT/Rotate_right.xml", IND_ALPHA, IND_32);
+	getMI()->_animationManager->addToSurface(getAnimationRight(), "../SpaceGame/resources/Spaceship rotation smoke/RIGHT/Rotate_right.xml", IND_ALPHA, IND_32);
 
-	getMI()->_animationManager->addToSurface(getAnimationExplode(), "resources/Spaceship explode/without motor/Explode_without_motor.xml", IND_ALPHA, IND_32);
+	getMI()->_animationManager->addToSurface(getAnimationExplode(), "../SpaceGame/resources/Spaceship explode/without motor/Explode_without_motor.xml", IND_ALPHA, IND_32);
 	// Manage the 2D entities - both entity2d and mAnim2dShip
 
 	getMI()->_entity2dManager->add(getEntity2d());
@@ -256,7 +282,7 @@ void Ship::createShip(CIndieLib * const mI,const char * path, const float posX, 
 	getEntity2d()->setHotSpot(0.5f, 0.5f); // comment out to see both entity2d and mAnim2dShip
 	getEntity2d()->setPosition(0, 0, 1);
 	setPosition(posX, posY);
-	getEntity2d()->setBoundingAreas("resources/Spaceship with motor new/spaceship_collisions.xml");
+	getEntity2d()->setBoundingAreas("../SpaceGame/resources/Spaceship with motor new/spaceship_collisions.xml");
 
 	getAnim2dShip()->setAnimation(getAnimationStill());
 	getAnim2dShip()->setHotSpot(0.5f, 0.5f);
@@ -302,9 +328,9 @@ void Ship::updateShip(Controls* controls, float mDelta)
 			getBlasterSound()->setPlayPosition(0);
 		}
 		getBullets().push_back(new Bullet());
-		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getAngleZ());
+		getBullets().back()->createBullet(getMI(), "../SpaceGame/resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() - M_PI / 6.0f) / 3.0f, getAngleZ());
 		getBullets().push_back(new Bullet());
-		getBullets().back()->createBullet(getMI(), "resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getAngleZ());
+		getBullets().back()->createBullet(getMI(), "../SpaceGame/resources/green_beam.png", getPosX() + getWidth()*cos(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getPosY() - getWidth()*sin(getAngleZRadian() + M_PI / 6.0f) / 3.0f, getAngleZ());
 
 		setNumFiredBullets(getNumFiredBullets() + 2);
 	}
@@ -445,14 +471,22 @@ void Ship::updateShip(Controls* controls, float mDelta)
 
 Ship::~Ship()
 {
+	// animations
 	getMI()->_animationManager->remove(getAnimationStill());
 	getMI()->_animationManager->remove(getAnimationShip());
 	getMI()->_animationManager->remove(getAnimationLeft());
 	getMI()->_animationManager->remove(getAnimationRight());
 	getMI()->_animationManager->remove(getAnimationExplode());
+
+	// 2d entity
 	getMI()->_entity2dManager->remove(getAnim2dShip());
+
 	delete getTimer();
+
+	// sound
 	getSoundEngine()->drop();
+
+	// bullets
 	for (vector<Bullet*>::iterator it = getBullets().begin(); it != getBullets().end(); ++it)
 	{
 			delete (*it);

@@ -113,42 +113,50 @@ void Menu::createMenu(CIndieLib* const mI)
 	int winHeight = getMI()->_window->getHeight();
 
 	// Manage the mouse pointer
-	getMI()->_surfaceManager->add(getMousePointerSurface(), "resources/cursor.png", IND_ALPHA, IND_32);
+	getMI()->_surfaceManager->add(getMousePointerSurface(), "../SpaceGame/resources/cursor.png", IND_ALPHA, IND_32);
 	getMI()->_entity2dManager->add(getMousePointer());
 	getMousePointer()->setSurface(getMousePointerSurface());
-	getMousePointer()->setBoundingAreas("resources/cursor_collisions.xml");
+	getMousePointer()->setBoundingAreas("../SpaceGame/resources/cursor_collisions.xml");
 
 	// Manage Button Surfaces
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		getIdleBtnSurfaces().push_back(IND_Surface::newSurface());
 		getActiveBtnSurfaces().push_back(IND_Surface::newSurface());
-		if (i == 0)
+		switch (i)
 		{
-			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnResume_idle.png", IND_ALPHA, IND_32);
-			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnResume_active.png", IND_ALPHA, IND_32);
-		}
-		else if (i == 1)
-		{
-			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnNG_idle.png", IND_ALPHA, IND_32);
-			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnNG_active.png", IND_ALPHA, IND_32);
-		}
-		else if(i == 2)
-		{
-			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnLG_idle.png", IND_ALPHA, IND_32);
-			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnLG_active.png", IND_ALPHA, IND_32);
-		}
-		else
-		{
-			getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "resources/Buttons/btnExit_idle.png", IND_ALPHA, IND_32);
-			getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "resources/Buttons/btnExit_active.png", IND_ALPHA, IND_32);
+			//-----Resume-----
+			case 0:
+				getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnResume_idle.png", IND_ALPHA, IND_32);
+				getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnResume_active.png", IND_ALPHA, IND_32);
+				break;
+			//-----New Game-----
+			case 1:
+				getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnNG_idle.png", IND_ALPHA, IND_32);
+				getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnNG_active.png", IND_ALPHA, IND_32);
+				break;
+			//-----Load Game-----
+			case 2:
+				getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnLG_idle.png", IND_ALPHA, IND_32);
+				getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnLG_active.png", IND_ALPHA, IND_32);
+				break;
+			//-----Save Game-----
+			case 3:
+				getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnSG_idle.png", IND_ALPHA, IND_32);
+				getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnSG_active.png", IND_ALPHA, IND_32);
+				break;
+			//-----Exit-----
+			case 4:
+				getMI()->_surfaceManager->add(getIdleBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnExit_idle.png", IND_ALPHA, IND_32);
+				getMI()->_surfaceManager->add(getActiveBtnSurfaces().back(), "../SpaceGame/resources/Buttons/btnExit_active.png", IND_ALPHA, IND_32);
+				break;
 		}
 	}
 
 	// set the scale to 6.5% of the window height
 	setScale(0.065 * winHeight / getIdleBtnSurfaces().back()->getHeight());
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		getMenuOptions().push_back(IND_Entity2d::newEntity2d());
 		getMI()->_entity2dManager->add(getMenuOptions().back());
@@ -158,14 +166,14 @@ void Menu::createMenu(CIndieLib* const mI)
 
 		getMenuOptions().back()->setScale(getScale(), getScale());
 
-		float yOffset = (0.35f + i * 0.1f) * winHeight; // also chage the initial offset (0.35f) in restoreProperties
+		float yOffset = (0.3f + i * 0.1f) * winHeight; // also chage the initial offset (0.35f) in restoreProperties
 		getMenuOptions().back()->setPosition(winWidth / 2.0f, yOffset, 2);
 		getMenuOptions().back()->setBoundingRectangle(("option" + to_string(i)).c_str(), 0, 0, getIdleBtnSurfaces().at(i)->getWidth(), getIdleBtnSurfaces().at(i)->getHeight());
 		//getMenuOptions().back()->setShow(false);
 	}
 }
 
-void Menu::updateMenu(Hud* mHud, vector<Planet*>& mPlanets, Ship*& mShip)
+void Menu::updateMenu(Hud* mHud, Save* quickSave, vector<Planet*>& mPlanets, Ship*& mShip)
 {
 	// check for collisions
 	short int i = 0, oldID = getSelectedID();
@@ -183,18 +191,27 @@ void Menu::updateMenu(Hud* mHud, vector<Planet*>& mPlanets, Ship*& mShip)
 			{
 				switch (i)
 				{
+					//-----Resume-----
 					case 0:
 						this->hide();
 					break;
+					//-----New Game-----
 					case 1:
 						this->hide();
 						startNewGame(getMI(), mHud, mPlanets, mShip);
 					break;
+					//-----Load Game-----
 					case 2:
 						this->hide();
 						deleteObjects(mHud, mShip, mPlanets);
 						break;
+					//-----Save Game-----
 					case 3:
+						quickSave->makeSave(mI, mShip, mPlanets);
+						break;
+					//-----Exit-----
+					case 4:
+						this->hide();
 						setExit(true);
 						break;
 				}
@@ -238,7 +255,7 @@ void Menu::restoreProperties(IND_Entity2d* option, short int id)
 {
 	option->setHotSpot(0.5f, 0.5f);
 	option->setScale(getScale(), getScale());
-	option->setPosition(getMI()->_window->getWidth() / 2.0f, (0.35f + 0.1 * id) * getMI()->_window->getHeight(), 2);
+	option->setPosition(getMI()->_window->getWidth() / 2.0f, (0.3f + 0.1 * id) * getMI()->_window->getHeight(), 2);
 	option->setBoundingRectangle(("option" + to_string(id)).c_str(), 0, 0, getIdleBtnSurfaces().at(id)->getWidth(), getIdleBtnSurfaces().at(id)->getHeight());
 }
 
@@ -289,12 +306,12 @@ void startNewGame(CIndieLib* const mI, Hud* mHud, vector<Planet*>& mPlanets, Shi
 		// there are 3 orbits: 50%, 65%, and 80% of half of the window's height
 		float orbitRadius = (winHeight / 2.0f) * ((60 + 15 * (i % 3)) / 100.0f);
 
-		mPlanets.back()->createPlanet(mI, ("resources/Planets/" + to_string(i + 1) + ".png").c_str(), posX, posY, -randDegree, randPercent, rand() % 2, orbitRadius);
+		mPlanets.back()->createPlanet(mI, ("../SpaceGame/resources/Planets/" + to_string(i + 1) + ".png").c_str(), posX, posY, -randDegree, randPercent, rand() % 2, orbitRadius);
 		while (mPlanets.back()->addSatellite());
 	}
 
 	mShip = new Ship(100, 0, 0, 0, winWidth / 20.0f, winWidth / 1.5f);
-	mShip->createShip(mI, "resources/Spaceship with motor new/1.png", winWidth / 2.0f, winHeight / 2.0f);
+	mShip->createShip(mI, "../SpaceGame/resources/Spaceship with motor new/1.png", winWidth / 2.0f, winHeight / 2.0f);
 
 	mHud->showHud();
 	mHud->getLoadingText()->setShow(false);

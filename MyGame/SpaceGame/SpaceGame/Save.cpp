@@ -37,21 +37,25 @@ void Save::setSaveFile(ofstream* saveFile)
 
 void Save::makeSave(CIndieLib* mI, Ship* mShip, vector<Planet*>& mPlanets)
 {
-	setMI(mI);
-	getSaveFile()->open("Saves/quickSave.txt", ios::trunc);
-	if (!getSaveFile()->is_open())
+	if (mShip != NULL)
 	{
-		writeError(1000, 100, "Save", "Can't open file for writing!");
-		return;
+		setMI(mI);
+		getSaveFile()->open("../SpaceGame/Saves/quickSave.txt", ios::trunc);
+		if (!getSaveFile()->is_open())
+		{
+			writeError(1000, 100, "Save", "Can't open file for writing!");
+			return;
+		}
+
+		writeShip(mShip);
+		short int i = 0;
+		for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
+		{
+			writePlanet(*it, i);
+			i++;
+		}
+		getSaveFile()->close();
 	}
-	writeShip(mShip);
-	short int i = 0;
-	for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
-	{
-		writePlanet(*it, i);
-		i++;
-	}
-	getSaveFile()->close();
 }
 
 void Save::writeLine(string key, string value)
@@ -126,7 +130,7 @@ void Save::writeShip(Ship* mShip)
 void Save::loadSave(CIndieLib* mI, Ship*& mShip, vector<Planet*>& mPlanets)
 {
 	setMI(mI);
-	getLoadFile()->open("Saves/quickSave.txt", ios::in);
+	getLoadFile()->open("../SpaceGame/Saves/quickSave.txt", ios::in);
 	if (!getLoadFile()->is_open())
 	{
 		writeError(1000, 200, "Save", "Can't open file for reading!");
@@ -163,7 +167,7 @@ bool Save::readLine(Ship* mShip, vector<Planet*>& mPlanets)
 			{
 				mShip->getBullets().push_back(new Bullet());
 				mShip->getBullets().back()->setMI(getMI());
-				mShip->getBullets().back()->getEntity2d()->setBoundingAreas("resources/green_beam_collisions.xml");
+				mShip->getBullets().back()->getEntity2d()->setBoundingAreas("../SpaceGame/resources/green_beam_collisions.xml");
 			}
 			readBullet(mShip->getBullets().back(), property, value);
 		}
@@ -286,6 +290,7 @@ void Save::readSatellite(Satellite* mSatellite, string& property, string& value)
 		{
 			mSatellite->setOrbitRadius(stof(value));
 			mSatellite->getEntity2d()->setBoundingCircle("satellite", mSatellite->getSurface()->getWidth() / 2.0f, mSatellite->getSurface()->getWidth() / 2.0f, mSatellite->getSurface()->getWidth() / 2.0f);
+			getMI()->_animationManager->addToSurface(mSatellite->getAnimationDust(), "../SpaceGame/resources/animations/dust.xml", IND_ALPHA, IND_32, 255, 0, 255);
 		}
 	}
 }
@@ -337,7 +342,7 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 			// manage the 2d entity
 			mShip->getEntity2d()->setPosition(mShip->getPosX(), mShip->getPosY(), 1);
 			// set bounding areas
-			mShip->getEntity2d()->setBoundingAreas("resources/Spaceship with motor new/spaceship_collisions.xml");
+			mShip->getEntity2d()->setBoundingAreas("../SpaceGame/resources/Spaceship with motor new/spaceship_collisions.xml");
 
 			// Manage Sound
 			mShip->setSoundEngine(irrklang::createIrrKlangDevice());
@@ -346,9 +351,12 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 			{
 				writeError(1000, 100, "SoundEngine", "can't create device.");
 			}
-			mShip->setRocketSound(mShip->getSoundEngine()->play2D("irrKlang/media/v-start.wav", true, true, true));
-			mShip->setBlasterSoundSource(mShip->getSoundEngine()->addSoundSourceFromFile("irrKlang/media/blaster.wav"));
-			mShip->setBlasterSound(mShip->getSoundEngine()->play2D("irrKlang/media/blaster.wav", false, true, true));
+			mShip->setRocketSound(mShip->getSoundEngine()->play2D("../SpaceGame/irrKlang/media/v-start.wav", true, true, true));
+			mShip->setBlasterSoundSource(mShip->getSoundEngine()->addSoundSourceFromFile("../SpaceGame/irrKlang/media/blaster.wav"));
+			mShip->setBlasterSound(mShip->getSoundEngine()->play2D("../SpaceGame/irrKlang/media/blaster.wav", false, true, true));
+
+			mShip->setExplodeSoundSource(mShip->getSoundEngine()->addSoundSourceFromFile("../SpaceGame/irrKlang/media/explosion.wav"));
+			mShip->setExplodeSound(mShip->getSoundEngine()->play2D("../SpaceGame/irrKlang/media/explosion.wav", false, true, true));
 			mShip->getSoundEngine()->setSoundVolume(0.1f);
 		}
 		if (!property.compare("mAnimationShip"))

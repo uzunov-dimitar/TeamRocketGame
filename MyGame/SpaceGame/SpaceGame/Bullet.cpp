@@ -16,7 +16,7 @@ void Bullet::createBullet(CIndieLib*const mI, const char* path, float posX, floa
 	getEntity2d()->setHotSpot(0.5f, 0.5f);
 	setPosition(posX, posY);
 	setAngleZ(angleZ);
-	getEntity2d()->setBoundingAreas("resources/green_beam_collisions.xml");
+	getEntity2d()->setBoundingAreas("../SpaceGame/resources/green_beam_collisions.xml");
 
 	float scale = (0.02*(getMI()->_window->getHeight() / getSurface()->getHeight()));
 	setScale(scale, scale);
