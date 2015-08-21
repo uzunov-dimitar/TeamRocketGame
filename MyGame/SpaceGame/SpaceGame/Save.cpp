@@ -37,7 +37,7 @@ void Save::setSaveFile(ofstream* saveFile)
 
 void Save::makeSave(CIndieLib* mI, Ship* mShip, vector<Planet*>& mPlanets)
 {
-	if (mShip != NULL)
+	if (mShip != NULL && mShip->getHealth() > 0)
 	{
 		setMI(mI);
 		getSaveFile()->open("../SpaceGame/Saves/quickSave.txt", ios::trunc);
@@ -83,11 +83,18 @@ void Save::writePlanet(Planet* mPlanet, int i)
 	writeObject("planet" + to_string(i), mPlanet);
 	writeLine("planet" + to_string(i) + "-circleTrajectory", to_string(mPlanet->isCircletrajectory()));
 	writeLine("planet" + to_string(i) + "-orbitRadius", to_string(mPlanet->getOrbitRadius()));
-	short int id = 0;
+	writeLine("planet" + to_string(i) + "-timer", to_string(mPlanet->getTimer()));
+	writeLine("planet" + to_string(i) + "-shootingFrequency", to_string(mPlanet->getShootingFrequency()));
+	for (vector<Bullet*>::iterator it = mPlanet->getBullets().begin(); it != mPlanet->getBullets().end(); ++it)
+	{
+		// So far a bullet does not have any additional properties compared to an Object
+		writeBullet("planet" + to_string(i) + "-bullet" + to_string(it - mPlanet->getBullets().begin()), *it);
+	}
 	for (vector<Satellite*>::iterator it = mPlanet->getSatellites().begin(); it != mPlanet->getSatellites().end(); ++it)
 	{
-		writeSatellite("planet" + to_string(i) + "-satellite" + to_string(id), *it);
-		id++;
+		// it - mPlanet->getSatellites().begin() 
+		// equals the serial id of the satellite
+		writeSatellite("planet" + to_string(i) + "-satellite" + to_string(it - mPlanet->getSatellites().begin()), *it);
 	}
 }
 
@@ -113,18 +120,25 @@ void Save::writeShip(Ship* mShip)
 	writeLine("ship-jolt", to_string(mShip->getJolt()));
 	writeLine("ship-maxSpeed", to_string(mShip->getMaxSpeed()));
 
+	writeLine("ship-timer", to_string(mShip->getTimer()));
+
 	writeLine("ship-mAnimationStill", mShip->getAnimationStill()->getName());
 	writeLine("ship-mAnimationShip", mShip->getAnimationShip()->getName());
 	writeLine("ship-mAnimationLeft", mShip->getAnimationLeft()->getName());
 	writeLine("ship-mAnimationRight", mShip->getAnimationRight()->getName());
 	writeLine("ship-mAnimationExplode", mShip->getAnimationExplode()->getName());
-	int i = 0;
+
 	for (vector<Bullet*>::iterator it = mShip->getBullets().begin(); it != mShip->getBullets().end(); ++it)
 	{
 		// So far a bullet does not have any additional properties compared to an Object
-		writeObject("bullet" + to_string(i), *it);
-		i++;
+		writeBullet("ship-bullet" + to_string(it - mShip->getBullets().begin()), *it);
 	}
+}
+
+void Save::writeBullet(string name, Bullet* mBullet)
+{
+	writeObject(name, mBullet);
+	writeLine(name + "-speedXY", to_string(mBullet->getSpeedXY()));
 }
 
 void Save::loadSave(CIndieLib* mI, Ship*& mShip, vector<Planet*>& mPlanets)
@@ -156,20 +170,9 @@ bool Save::readLine(Ship* mShip, vector<Planet*>& mPlanets)
 		string property = line.substr(line.find_first_of("-") + 1, line.find_first_of("]") - line.find_first_of("-") - 1);
 		line = line.substr(line.find_first_of("=")+1);
 		string value = line.substr(line.find_first_of("=") + 2, line.find_first_of("]") - line.find_first_of("[") - 1);
-		if (!objectName.compare(0, 6, "ship") )
+		if (!objectName.compare(0, 4, "ship") )
 		{
 			readShip(mShip, property, value);
-		}
-		else if (!objectName.compare(0, 6, "bullet"))
-		{
-			int id = std::stoi(objectName.substr(objectName.find_first_of("t")+1));
-			if (mShip->getBullets().size() <= id) 
-			{
-				mShip->getBullets().push_back(new Bullet());
-				mShip->getBullets().back()->setMI(getMI());
-				mShip->getBullets().back()->getEntity2d()->setBoundingAreas("../SpaceGame/resources/green_beam_collisions.xml");
-			}
-			readBullet(mShip->getBullets().back(), property, value);
 		}
 		else
 		{
@@ -248,6 +251,7 @@ bool Save::readObject(Object* mObject, string& property, string& value)
 		mObject->getEntity2d()->setHotSpot(0.5f, 0.5f);
 		return true;
 	}
+	// if none of the IFs executes, the property is not one of an object therefore return false
 	return false;
 }
 
@@ -264,6 +268,28 @@ void Save::readPlanet(Planet* mPlanet, string& property, string& value)
 		{
 			mPlanet->setOrbitRadius(stof(value));
 			mPlanet->getEntity2d()->setBoundingCircle("planet", mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f, mPlanet->getSurface()->getWidth() / 2.0f);
+		}
+		if (!property.compare("timer"))
+		{
+			mPlanet->setTimer(stof(value));
+		}
+		if (!property.compare("shootingFrequency"))
+		{
+			mPlanet->setShootingFrequency(stof(value));
+		}
+		if (!property.compare(0, 6, "bullet"))
+		{
+			// extract the serial number of the bullet
+			int id = std::stoi(property.substr(6, property.find_first_of("-") - 6));
+			if (mPlanet->getBullets().size() <= id)
+			{
+				mPlanet->getBullets().push_back(new Bullet());
+				mPlanet->getBullets().back()->setMI(getMI());
+			}
+
+			// change property so that it contains only the actual property of the bullet
+			property = property.substr(property.find_first_of("-") + 1, property.find_first_of("]") - property.find_first_of("-") - 1);
+			readBullet(mPlanet->getBullets().back(), property, value);
 		}
 		if (!property.compare(0, 9, "satellite"))
 		{
@@ -331,6 +357,10 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		{
 			mShip->setMaxSpeed(stof(value));
 		}
+		if (!property.compare("timer"))
+		{
+			mShip->setTimer(stof(value));
+		}
 		if (!property.compare("mAnimationStill"))
 		{
 			//Manage the animation
@@ -343,21 +373,6 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 			mShip->getEntity2d()->setPosition(mShip->getPosX(), mShip->getPosY(), 1);
 			// set bounding areas
 			mShip->getEntity2d()->setBoundingAreas("../SpaceGame/resources/Spaceship with motor new/spaceship_collisions.xml");
-
-			// Manage Sound
-			mShip->setSoundEngine(irrklang::createIrrKlangDevice());
-
-			if (!mShip->getSoundEngine())
-			{
-				writeError(1000, 100, "SoundEngine", "can't create device.");
-			}
-			mShip->setRocketSound(mShip->getSoundEngine()->play2D("../SpaceGame/irrKlang/media/v-start.wav", true, true, true));
-			mShip->setBlasterSoundSource(mShip->getSoundEngine()->addSoundSourceFromFile("../SpaceGame/irrKlang/media/blaster.wav"));
-			mShip->setBlasterSound(mShip->getSoundEngine()->play2D("../SpaceGame/irrKlang/media/blaster.wav", false, true, true));
-
-			mShip->setExplodeSoundSource(mShip->getSoundEngine()->addSoundSourceFromFile("../SpaceGame/irrKlang/media/explosion.wav"));
-			mShip->setExplodeSound(mShip->getSoundEngine()->play2D("../SpaceGame/irrKlang/media/explosion.wav", false, true, true));
-			mShip->getSoundEngine()->setSoundVolume(0.1f);
 		}
 		if (!property.compare("mAnimationShip"))
 		{
@@ -375,6 +390,20 @@ void Save::readShip(Ship* mShip, string& property, string& value)
 		{
 			getMI()->_animationManager->addToSurface(mShip->getAnimationExplode(), value.c_str(), IND_ALPHA, IND_32);
 		}
+		if (!property.compare(0, 6, "bullet"))
+		{
+			// extract the serial number of the bullet
+			int id = std::stoi(property.substr(6, property.find_first_of("-") - 6));
+			if (mShip->getBullets().size() <= id)
+			{
+				mShip->getBullets().push_back(new Bullet());
+				mShip->getBullets().back()->setMI(getMI());
+			}
+
+			// change property so that it contains only the actual property of the bullet
+			property = property.substr(property.find_first_of("-") + 1, property.find_first_of("]") - property.find_first_of("-") - 1);
+			readBullet(mShip->getBullets().back(), property, value);
+		}
 	}
 }
 
@@ -382,7 +411,11 @@ void Save::readBullet(Bullet* mBullet, string& property, string& value)
 {
 	if (!readObject(mBullet, property, value))
 	{
-		// No additional properties to read
+		if (!property.compare("speedXY"))
+		{
+			mBullet->setSpeedXY(stof(value));
+			mBullet->getEntity2d()->setBoundingAreas("../SpaceGame/resources/green_beam_collisions.xml");
+		}
 	}
 }
 

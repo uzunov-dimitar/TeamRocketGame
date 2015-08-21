@@ -17,9 +17,9 @@ private:
 	// In Degrees!
 	// NOTE: in indielib clockwise movement is considered positive and not negative!
 	float angleZ;
-	float angularSpeed; // add to save
-	float angularAcceleration; // add to save
-	float maxAngularSpeed; //add to save
+	float angularSpeed;
+	float angularAcceleration;
+	float maxAngularSpeed;
 
 	char* pathSurface;
 	CIndieLib* mI;

@@ -14,6 +14,7 @@ private:
 	IND_Entity2d* healthText;
 	IND_Entity2d* scoreText;
 	IND_Entity2d* loadingText;
+	IND_Entity2d* gameOverText;
 public:
 	Hud();
 
@@ -30,10 +31,14 @@ public:
 	void setScoreText(IND_Entity2d*);
 	IND_Entity2d* getLoadingText() const;
 	void setLoadingText(IND_Entity2d*);
+	IND_Entity2d* getGameOverText() const;
+	void setGameOverText(IND_Entity2d*);
 
 	void createHud(CIndieLib*const);
 
 	void updateHud(Ship*);
+
+	void updateGameOverText(int);
 
 	void hideHud();
 	void showHud();

@@ -14,8 +14,7 @@ void Satellite::setOrbitRadius(float orbitRadius)
 	this->orbitRadius = orbitRadius;
 }
 
-IND_Animation* Satellite::
-getAnimationDust() const
+IND_Animation* Satellite::getAnimationDust() const
 {
 	return mAnimationDust;
 }
@@ -79,7 +78,7 @@ void Satellite::destroy()
 	setScale(getScaleX(), getScaleY());
 }
 
-bool Satellite::destroyed()
+bool Satellite::isDestroyed()
 {
 	return (getAnimationDust()->getActualFramePos(0) == 11);
 }

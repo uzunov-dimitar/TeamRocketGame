@@ -5,10 +5,16 @@
 
 class Bullet : public Object {
 private:
+	float speedXY;
 public:
-	// @overwrite
+	Bullet(float speedXY = 0);
+	// @override
 	virtual float getAngleZRadian() const;
 
+	float getSpeedXY() const;
+	void setSpeedXY(float);
+
+	void setTint(short, short, short);
 	void createBullet(CIndieLib* const, const char*, float, float, float);
 	bool updateBullet(float);
 };

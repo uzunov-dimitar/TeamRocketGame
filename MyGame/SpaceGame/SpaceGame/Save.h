@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <string>
-#include "irrKlang.h"
 #include "ErrorHandler.h"
 #include "Bullet.h"
 #include "Planet.h"
@@ -33,6 +32,7 @@ public:
 	void writePlanet(Planet*, int);
 	void writeSatellite(string, Satellite*);
 	void writeShip(Ship*);
+	void writeBullet(string, Bullet*);
 
 	// functions related to loading
 	void loadSave(CIndieLib*, Ship*&, vector<Planet*>&);

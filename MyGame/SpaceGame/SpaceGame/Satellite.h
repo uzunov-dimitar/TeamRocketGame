@@ -25,7 +25,7 @@ public:
 	void moveInCircle(float, float);
 
 	void destroy();
-	bool destroyed();
+	bool isDestroyed();
 
 	~Satellite();
 };

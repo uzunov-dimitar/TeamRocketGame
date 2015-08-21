@@ -96,6 +96,7 @@
     <ClCompile Include="Satellite.cpp" />
     <ClCompile Include="Save.cpp" />
     <ClCompile Include="Ship.cpp" />
+    <ClCompile Include="SoundEngine.cpp" />
     <ClCompile Include="tools\editor_tileless\CIndieLib.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +110,7 @@
     <ClInclude Include="Satellite.h" />
     <ClInclude Include="Save.h" />
     <ClInclude Include="Ship.h" />
+    <ClInclude Include="SoundEngine.h" />
     <ClInclude Include="tools\editor_tileless\CIndieLib.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

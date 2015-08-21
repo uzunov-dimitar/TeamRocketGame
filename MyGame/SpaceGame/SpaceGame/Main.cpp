@@ -6,14 +6,14 @@
 #include "IND_Font.h"
 #include "IND_Entity2d.h"
 #include "IND_Timer.h"
-#include "irrKlang.h"
 #include "Controls.h"
 #include "Hud.h"
-#include "Planet.h"
+#include "Menu.h"
 #include "Save.h"
+#include "SoundEngine.h"
+#include "Planet.h"
 #include "Ship.h"
 #include "Satellite.h"
-#include "Menu.h"
 /*
 ==================
 Main
@@ -21,7 +21,8 @@ Main
 */
 
 void checkShipPlanetsCollisions(CIndieLib* const, vector<Planet*>, Ship*);
-void checkBulletsPlanetsCollisions(CIndieLib* const, vector<Planet*>, vector<Bullet*>&);
+void checkBulletsPlanetsCollisions(CIndieLib* const, vector<Planet*>, Ship*);
+void checkBulletsShipCollisions(CIndieLib* const, vector<Planet*>, Ship*);
 
 int IndieLib()
 {
@@ -68,6 +69,11 @@ int IndieLib()
 
 	Save* quickSave = new Save();
 
+	if (!SoundEngine::initialize())
+	{
+		error->writeError(200, 100, "Error", "SoundEngine");
+	}
+
 	vector<Planet*> mPlanets;
 	Ship* mShip = NULL;
 
@@ -75,6 +81,8 @@ int IndieLib()
 	float mDelta = 0.0f;
 
 	IND_Timer* mTimer = new IND_Timer;
+	mTimer->start();
+
 	while (!mI->_input->onKeyPress(IND_ESCAPE) && !mI->_input->quit() && !mMenu->isExit())
 	{
 		// get delta time
@@ -83,7 +91,7 @@ int IndieLib()
 		if (mI->_input->isKeyPressed(controls->getMenu()))
 		{
 			mMenu->show();
-			//mShip->getSoundEngine()->setAllSoundsPaused(true);
+			SoundEngine::getSoundEngine()->setAllSoundsPaused(true);
 		}
 		if (!mMenu->isHidden())
 		{
@@ -96,6 +104,7 @@ int IndieLib()
 			{
 				mDelta = 0.0;
 				loadSave = false;
+				SoundEngine::getSoundEngine()->setAllSoundsPaused(true);
 				mHud->getLoadingText()->setShow(false);
 				quickSave->loadSave(mI, mShip, mPlanets);
 				mHud->showHud();
@@ -115,21 +124,37 @@ int IndieLib()
 					deleteObjects(mHud, mShip, mPlanets);
 					loadSave = true;
 				}
-				else
+				if (mShip->isDestroyed())
+				{
+					SoundEngine::getSoundEngine()->setAllSoundsPaused(true);
+					mHud->updateGameOverText(mShip->getScore());
+					deleteObjects(mHud, mShip, mPlanets);
+					mHud->getLoadingText()->setShow(false);
+					mHud->getGameOverText()->setShow(true);
+					mMenu->show();
+				}
+				if(mShip!=NULL)
 				{
 					//----- Collisions -----
 					checkShipPlanetsCollisions(mI, mPlanets, mShip);
-					checkBulletsPlanetsCollisions(mI, mPlanets, mShip->getBullets());
+					checkBulletsPlanetsCollisions(mI, mPlanets, mShip);
+					checkBulletsShipCollisions(mI, mPlanets, mShip);
 
 					//----- Movement update -----
 					mShip->updateShip(controls, mDelta);
+					if ((mTimer->getTicks() / 1000.0f) >= 3.0f)
+					{
+						mTimer->start();
+						mPlanets.at(rand() % mPlanets.size())->addSatellite();
+					}
 					for (vector<Planet*>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it)
 					{
-						(*it)->updatePlanet(mDelta);
+						(*it)->updatePlanet(mDelta, (mShip->getPosX() + 0.25f * mShip->getHeight() * cos(mShip->getAngleZRadian())), (mShip->getPosY() - 0.25f * mShip->getHeight() * sin(mShip->getAngleZRadian())));
 					}
 				}
 			}
 		}
+
 		//mI->_render->showFpsInWindowTitle();
 		mI->_input->update();
 		mI->_render->beginScene();
@@ -193,45 +218,111 @@ void checkShipPlanetsCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, S
 			}
 
 			// decrease health
-			if ((mShip->getTimer()->getTicks() / 1000.f) > 1.0f || mShip->getLastHitPlanet() != (it - mPlanets.begin()))
+			if (mShip->getTimer() > 1.0f || mShip->getLastHitPlanet() != (it - mPlanets.begin()))
 			{
 				mShip->setHealth(mShip->getHealth() - 10);
-				mShip->getTimer()->start();
+				mShip->setTimer(0.0f);
 				mShip->setLastHitPlanet(it - mPlanets.begin());
 			}
 			
 		}
 
 		// check satellites collisions
-		for (vector<Satellite*>::iterator itSat = (*it)->getSatellites().begin(); itSat != (*it)->getSatellites().end(); ++itSat)
+		for (vector<Satellite*>::iterator itSatellite = (*it)->getSatellites().begin(); itSatellite != (*it)->getSatellites().end(); ++itSatellite)
 		{
-			if (mI->_entity2dManager->isCollision((*itSat)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_vertice")
-				|| mI->_entity2dManager->isCollision((*itSat)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_body"))
+			if (mI->_entity2dManager->isCollision((*itSatellite)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_vertice")
+				|| mI->_entity2dManager->isCollision((*itSatellite)->getEntity2d(), "satellite", mShip->getEntity2d(), "ship_body"))
 			{
 				mShip->setHealth(mShip->getHealth() - 5);
 				mShip->setScore(mShip->getScore() + 10);
-				mShip->getExplodeSound()->drop();
-				mShip->setExplodeSound(mShip->getSoundEngine()->play2D(mShip->getExplodeSoundSource(), false, false, true));
-				(*itSat)->destroy();
+				(*itSatellite)->destroy();
+				SoundEngine::getExplodeSound()->drop();
+				SoundEngine::setExplodeSound(SoundEngine::getSoundEngine()->play2D(SoundEngine::getExplodeSoundSource(), false, false, true));
 			}
 		}
 	}
 }
 
-void checkBulletsPlanetsCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, vector<Bullet*>& shotBullets)
+void checkBulletsPlanetsCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
 {
-
 	for (vector<Planet*>::iterator itPlanet = mPlanets.begin(); itPlanet != mPlanets.end(); ++itPlanet)
 	{
-		for (vector<Bullet*>::iterator itBullet = shotBullets.begin(); itBullet != shotBullets.end(); ++itBullet)
+		for (vector<Bullet*>::iterator itBullet = mShip->getBullets().begin(); itBullet != mShip->getBullets().end(); ++itBullet)
 		{
 			if (mI->_entity2dManager->isCollision((*itPlanet)->getEntity2d(), "planet", (*itBullet)->getEntity2d(), "bullet"))
 			{
 				delete *itBullet;
-				shotBullets.erase(itBullet);
+				mShip->getBullets().erase(itBullet);
 				--itBullet;
+				break;
 			}
-			//for ()
+			for (vector<Satellite*>::iterator itSatellite = (*itPlanet)->getSatellites().begin(); itSatellite != (*itPlanet)->getSatellites().end(); ++itSatellite)
+			{
+				if (mI->_entity2dManager->isCollision((*itSatellite)->getEntity2d(), "satellite", (*itBullet)->getEntity2d(), "bullet"))
+				{
+					delete *itBullet;
+					mShip->getBullets().erase(itBullet);
+					--itBullet;
+					(*itSatellite)->destroy();
+
+					mShip->setScore(mShip->getScore() + 10);
+					SoundEngine::getExplodeSound()->drop();
+					SoundEngine::setExplodeSound(SoundEngine::getSoundEngine()->play2D(SoundEngine::getExplodeSoundSource(), false, false, true));
+					break;
+				}
+			}
+		}
+	}
+}
+
+void checkBulletsShipCollisions(CIndieLib* const mI, vector<Planet*> mPlanets, Ship* mShip)
+{
+	for (vector<Planet*>::iterator itPlanet = mPlanets.begin(); itPlanet != mPlanets.end(); ++itPlanet)
+	{
+		for (vector<Bullet*>::iterator itBullet = (*itPlanet)->getBullets().begin(); itBullet != (*itPlanet)->getBullets().end(); ++itBullet)
+		{
+			if (mI->_entity2dManager->isCollision((*itBullet)->getEntity2d(), "bullet", mShip->getEntity2d(), "ship_vertice")
+				|| mI->_entity2dManager->isCollision((*itBullet)->getEntity2d(), "bullet", mShip->getEntity2d(), "ship_body"))
+			{
+				mShip->setHealth(mShip->getHealth() - 5);
+				delete *itBullet;
+				(*itPlanet)->getBullets().erase(itBullet);
+				--itBullet;
+				break;
+			}
+			for (vector<Planet*>::iterator itPlanetCollide = mPlanets.begin(); itPlanetCollide != mPlanets.end(); ++itPlanetCollide)
+			{
+				if (itPlanet != itPlanetCollide 
+					&& mI->_entity2dManager->isCollision((*itBullet)->getEntity2d(), "bullet", (*itPlanetCollide)->getEntity2d(), "planet"))
+				{
+					delete *itBullet;
+					(*itPlanet)->getBullets().erase(itBullet);
+					--itBullet;
+					break;
+				}
+				bool satelliteCollision = false;
+				for (vector<Satellite*>::iterator itSatellite = (*itPlanetCollide)->getSatellites().begin(); itSatellite != (*itPlanetCollide)->getSatellites().end(); ++itSatellite)
+				{
+					if (mI->_entity2dManager->isCollision((*itSatellite)->getEntity2d(), "satellite", (*itBullet)->getEntity2d(), "bullet"))
+					{
+						delete *itBullet;
+						(*itPlanet)->getBullets().erase(itBullet);
+						--itBullet;
+						(*itSatellite)->destroy();
+
+						SoundEngine::getExplodeSound()->drop();
+						SoundEngine::setExplodeSound(SoundEngine::getSoundEngine()->play2D(SoundEngine::getExplodeSoundSource(), false, false, true));
+
+						satelliteCollision = true;
+						break;
+					}
+				}
+
+				if (satelliteCollision)
+				{
+					break;
+				}
+			}
 		}
 	}
 }

@@ -1,8 +1,28 @@
 #include "Bullet.h"
 
+Bullet::Bullet(float speedXY): speedXY(speedXY)
+{
+}
+
+// @override
 float Bullet::getAngleZRadian() const
 {
 	return (-getAngleZ() + 90.0f) / 180.0f * M_PI;
+}
+
+float Bullet::getSpeedXY() const
+{
+	return speedXY;
+}
+
+void Bullet::setSpeedXY(float speedXY)
+{
+	this->speedXY = speedXY;
+}
+
+void Bullet::setTint(short pR, short pG, short pB)
+{
+	getEntity2d()->setTint(pR, pG, pB);
 }
 
 void Bullet::createBullet(CIndieLib*const mI, const char* path, float posX, float posY, float angleZ)
@@ -21,8 +41,8 @@ void Bullet::createBullet(CIndieLib*const mI, const char* path, float posX, floa
 	float scale = (0.02*(getMI()->_window->getHeight() / getSurface()->getHeight()));
 	setScale(scale, scale);
 
-	setSpeedX(getMI()->_window->getWidth() * cos(getAngleZRadian()));
-	setSpeedY(- getMI()->_window->getWidth() * sin(getAngleZRadian()));
+	setSpeedX(getSpeedXY() * cos(getAngleZRadian()));
+	setSpeedY(getSpeedXY() * sin(-getAngleZRadian()));
 }
 
 bool Bullet::updateBullet(float mDelta)

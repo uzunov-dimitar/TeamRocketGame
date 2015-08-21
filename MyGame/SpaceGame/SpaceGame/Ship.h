@@ -1,12 +1,15 @@
 #ifndef SHIP_H
 #define SHIP_H
 
-#include "irrKlang.h"
+
+#include "CIndieLib.h"
+#include "IND_Animation.h"
 #include "IND_Timer.h"
 #include "Object.h"
 #include "Bullet.h"
 #include "Controls.h"
-#include "IND_Animation.h"
+#include "SoundEngine.h"
+
 
 class Ship : public Object {
 private:
@@ -21,6 +24,8 @@ private:
 	float jolt;
 	float maxSpeed;
 
+	float timer; // add to save
+
 	IND_Animation* mAnimationStill;
 	IND_Animation* mAnimationShip;
 	IND_Animation* mAnimationLeft;
@@ -29,25 +34,11 @@ private:
 
 	IND_Entity2d* mAnim2dShip;
 
-	IND_Timer* timer;
-
-	// irrKlang Sound Engine
-	irrklang::ISoundEngine* soundEngine;
-
-	// movement sound
-	irrklang::ISound* rocketSound;
-	// blaster sound
-	irrklang::ISoundSource* blasterSoundSource;
-	irrklang::ISound* blasterSound;
-	// explosion sound
-	irrklang::ISoundSource* explodeSoundSource; // add to load
-	irrklang::ISound* explodeSound; // add to load
-
 	vector<Bullet*> mBullets;
 public:
 	Ship(int health = 100, int numFiredBullets = 0, int score = 0, float acceleration = 0.0f, float jolt = 50.0f, float maxSpeed = 2000.0f);
 
-	// @overwrite
+	// @override
 	virtual float getAngleZRadian() const;
 
 	int getHealth() const;
@@ -59,6 +50,8 @@ public:
 	short getLastHitPlanet() const;
 	void setLastHitPlanet(short);
 
+	bool isDestroyed();
+
 	float getSpeed() const;
 	void setSpeed(float);
 	float getAcceleration() const;
@@ -67,6 +60,9 @@ public:
 	void setJolt(float);
 	float getMaxSpeed() const;
 	void setMaxSpeed(float);
+
+	float getTimer() const;
+	void setTimer(float);
 
 	IND_Animation* getAnimationStill() const;
 	void setAnimationStill(IND_Animation*);
@@ -81,25 +77,6 @@ public:
 
 	IND_Entity2d* getAnim2dShip() const;
 	void setAnim2dShip(IND_Entity2d*);
-
-	IND_Timer* getTimer() const;
-	void setTimer(IND_Timer*);
-
-	irrklang::ISoundEngine* getSoundEngine() const;
-	void setSoundEngine(irrklang::ISoundEngine*);
-
-	irrklang::ISound* getRocketSound() const;
-	void setRocketSound(irrklang::ISound*);
-
-	irrklang::ISoundSource* getBlasterSoundSource() const;
-	void setBlasterSoundSource(irrklang::ISoundSource*);
-	irrklang::ISound* getBlasterSound() const;
-	void setBlasterSound(irrklang::ISound*);
-
-	irrklang::ISoundSource* getExplodeSoundSource() const;
-	void setExplodeSoundSource(irrklang::ISoundSource*);
-	irrklang::ISound* getExplodeSound() const;
-	void setExplodeSound(irrklang::ISound*);
 
 	vector<Bullet*>& getBullets();
 	void setBullets(vector<Bullet*>);

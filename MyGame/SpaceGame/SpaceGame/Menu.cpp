@@ -307,7 +307,7 @@ void startNewGame(CIndieLib* const mI, Hud* mHud, vector<Planet*>& mPlanets, Shi
 		float orbitRadius = (winHeight / 2.0f) * ((60 + 15 * (i % 3)) / 100.0f);
 
 		mPlanets.back()->createPlanet(mI, ("../SpaceGame/resources/Planets/" + to_string(i + 1) + ".png").c_str(), posX, posY, -randDegree, randPercent, rand() % 2, orbitRadius);
-		while (mPlanets.back()->addSatellite());
+		//while (mPlanets.back()->addSatellite());
 	}
 
 	mShip = new Ship(100, 0, 0, 0, winWidth / 20.0f, winWidth / 1.5f);

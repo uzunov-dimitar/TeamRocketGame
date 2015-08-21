@@ -1,6 +1,6 @@
 #include "Planet.h"
 
-Planet::Planet() : circleTrajectory(false), orbitRadius(0), lineX(IND_Entity2d::newEntity2d()), lineY(IND_Entity2d::newEntity2d())
+Planet::Planet() : circleTrajectory(false), orbitRadius(0.0f), timer(0.0f), shootingFrequency(0.0f), lineX(IND_Entity2d::newEntity2d()), lineY(IND_Entity2d::newEntity2d())
 {
 }
 
@@ -24,6 +24,26 @@ void Planet::setOrbitRadius(float orbitRadius)
 	this->orbitRadius = orbitRadius;
 }
 
+float Planet::getTimer() const
+{
+	return timer;
+}
+
+void Planet::setTimer(float timer)
+{
+	this->timer = timer;
+}
+
+float Planet::getShootingFrequency() const
+{
+	return shootingFrequency;
+}
+
+void Planet::setShootingFrequency(float shootingFrequency)
+{
+	this->shootingFrequency = shootingFrequency;
+}
+
 IND_Entity2d* Planet::getLineX() const
 {
 	return lineX;
@@ -44,6 +64,16 @@ void Planet::setLineY(IND_Entity2d* lineY)
 	this->lineY = lineY;
 }
 
+vector<Bullet*>& Planet::getBullets()
+{
+	return mBullets;
+}
+
+void Planet::setBullets(vector<Bullet*> mBullets)
+{
+	this->mBullets = mBullets;
+}
+
 vector<Satellite*>& Planet::getSatellites()
 {
 	return mSatellites;
@@ -54,7 +84,7 @@ void Planet::setSatellites(vector<Satellite*> mSatellites)
 	this->mSatellites = mSatellites;
 }
 
-void Planet::createPlanet(CIndieLib * const mI, const char * path, const float posX, const float posY, const float angleZRadian, const float scalePercent, const bool circleTrajectory, const float orbitRadius)
+void Planet::createPlanet(CIndieLib* const mI, const char * path, const float posX, const float posY, const float angleZRadian, const float scalePercent, const bool circleTrajectory, const float orbitRadius)
 {
 	// Initialize the master instance + error handler
 	setMI(mI);
@@ -66,7 +96,7 @@ void Planet::createPlanet(CIndieLib * const mI, const char * path, const float p
 	getMI()->_entity2dManager->add(getEntity2d());
 	getEntity2d()->setHotSpot(0.5f, 0.5f); // <-O
 
-	setPosition(posX, posY);
+	getEntity2d()->setPosition(posX, posY, 1);
 	setAngleZ(angleZRadian / M_PI * 180);
 	getEntity2d()->setBoundingCircle("planet", getSurface()->getWidth()/2.0f, getSurface()->getWidth() / 2.0f, getSurface()->getWidth() / 2.0f);
 
@@ -83,6 +113,8 @@ void Planet::createPlanet(CIndieLib * const mI, const char * path, const float p
 	setCircleTrajectory(circleTrajectory);
 	setOrbitRadius(orbitRadius);
 	setAngularSpeed(45.0f);
+
+	setShootingFrequency((50 + rand() % 50) / 10.0f);
 	/*getLineX()->setPrimitive2d(IND_LINE);
 	getLineY()->setPrimitive2d(IND_LINE);
 	getMI()->_entity2dManager->add(getLineX());
@@ -111,8 +143,32 @@ bool Planet::addSatellite()
 	}
 }
 
-void Planet::updatePlanet(float mDelta)
+void Planet::updatePlanet(float mDelta, double shipPosX, double shipPosY)
 {
+	setTimer(getTimer() + mDelta);
+
+	if (getSatellites().size() > 0  && getTimer() >= shootingFrequency)
+	{
+		setTimer(0.0f);
+		//SoundEngine::getBlasterSound()->drop();
+		//SoundEngine::setBlasterSound(SoundEngine::getSoundEngine()->play2D(SoundEngine::getBlasterSoundSource(), false, false, true));
+		getBullets().push_back(new Bullet(getMI()->_window->getWidth() / 2.5f));
+		double hypotenuse = sqrt((getPosX() - shipPosX)*(getPosX() - shipPosX) + (getPosY() - shipPosY)*(getPosY() - shipPosY));
+		double sine = (shipPosY - getPosY()) / hypotenuse;
+		double cosine = (shipPosX - getPosX()) / hypotenuse;
+		double angle = 0.0f;
+		if (asin(sine) >= 0.0f)
+		{
+			angle = acos(cosine);
+		}
+		else
+		{
+			angle = 2*M_PI - acos(cosine);
+		}
+		angle = (angle * 180.0f) / M_PI;
+		getBullets().back()->createBullet(getMI(), "../SpaceGame/resources/green_beam.png", getPosX(), getPosY(), angle + 90.0f);//+ 45 + (rand()%90) );
+		getBullets().back()->setTint(255, 128, 0);
+	}
 	// rotate
 	setAngleZ(getAngleZ() - (getAngularSpeed() * mDelta));
 
@@ -133,7 +189,7 @@ void Planet::updatePlanet(float mDelta)
 	}
 	for (vector<Satellite*>::iterator it = getSatellites().begin(); it != getSatellites().end(); ++it)
 	{
-		if ((*it)->destroyed())
+		if ((*it)->isDestroyed())
 		{
 			delete *it;
 			getSatellites().erase(it);
@@ -142,6 +198,17 @@ void Planet::updatePlanet(float mDelta)
 		else
 		{
 			(*it)->updateSatellite(getPosX(), getPosY(), mDelta);
+		}
+	}
+
+	// Manage Bullets:
+	for (vector<Bullet*>::iterator it = getBullets().begin(); it < getBullets().end(); ++it)
+	{
+		if ((*it)->updateBullet(mDelta))
+		{
+			vector<Bullet*>::iterator it2 = it;
+			delete (*it);
+			getBullets().erase(it);
 		}
 	}
 	//getLineX()->setLine(getPosX(), getPosY(), getPosX() + getSpeedX(), getPosY());
@@ -162,6 +229,13 @@ void Planet::moveInEllipse()
 
 Planet::~Planet()
 {
+	// bullets
+	for (vector<Bullet*>::iterator it = getBullets().begin(); it != getBullets().end(); ++it)
+	{
+		delete (*it);
+	}
+	getBullets().clear();
+	// satellites
 	for (vector<Satellite*>::iterator it = getSatellites().begin(); it != getSatellites().end(); ++it)
 	{
 		delete (*it);
